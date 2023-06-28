@@ -9,14 +9,12 @@ import androidx.navigation.navigation
 import com.keeghan.movieinfo.ui.screens.InfoScreen
 
 fun NavGraphBuilder.movieInfoNavGraph(navController: NavController) {
-    navigation(
-        route = Graph.MOVIE_INFO,
-        startDestination = Graph.MOVIE_INFO_SCREEN
-    ) {
-        composable(
-            route = "${Graph.MOVIE_INFO_SCREEN}/{movieId}",
-            arguments = listOf(navArgument("movieId") { type = NavType.StringType })
-        ) {
+    navigation(route = Graph.MOVIE_INFO, startDestination = Graph.MOVIE_INFO_SCREEN) {
+
+        composable(route = "${Graph.MOVIE_INFO_SCREEN}/{movieId}",
+            arguments = listOf(navArgument("movieId") {
+                type = NavType.StringType
+            })) { //navigate to movie details page with movie Id
             InfoScreen(navController, movieId = it.arguments?.getString("movieId")!!)
         }
     }

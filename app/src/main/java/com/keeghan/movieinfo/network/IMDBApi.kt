@@ -1,8 +1,9 @@
 package com.keeghan.movieinfo.network
 
 
-import com.keeghan.movieinfo.models.movieOverview.MovieOverViewResponse
-import com.keeghan.movieinfo.models.popularMovies.PopularMovieResponse
+import com.keeghan.movieinfo.models.MovieImagesResponse
+import com.keeghan.movieinfo.models.MovieOverViewResponse
+import com.keeghan.movieinfo.models.MovieParentalGuideResponse
 import com.keeghan.movieinfo.models.shows.ShowsResponse
 import retrofit2.Response
 import retrofit2.http.*
@@ -13,41 +14,26 @@ interface IMDBApi {
     @GET("v2/find")
     suspend fun findTitle(
         @Query("title") title: String,
-        @Query("paginationKey") page: Int?
+        @Query("paginationKey") page: Int?,
+        @Query("titleType") type: String?
     ): Response<ShowsResponse>
 
-    @GET("get-base")
+    @GET("get-overview-details")
     suspend fun findOverView(
         @Query("tconst") id: String
     ): Response<MovieOverViewResponse>
 
-    @GET("get-most-popular-movies")
-    suspend fun getPopularMovies(
-    ): Response<PopularMovieResponse>
+    @GET("get-images")
+    suspend fun getImages(
+        @Query("tconst") id: String,
+        @Query("limit") limit: String = "5"
+    ): Response<MovieImagesResponse>
 
-//    @GET("v2/find")
-//    suspend fun findTitle(
-//        @Query("title") title: String,
-//        @Query("paginationKey") page: String
-//    ): Response<ShowsResponse>
+    @GET("get-parental-guide")
+    suspend fun getParentalGuide(
+        @Query("tconst") id: String,
+    ): Response<MovieParentalGuideResponse>
 
-//    //Product Methods
-//    @GET("products/{id}")
-//    suspend fun findTitle(@Path("id") productId: Int):
-//
-//    @GET //uses url
-//    suspend fun getAllProduct(@Url url: String):
-//
-//    @POST("products")
-//    suspend fun createProduct(
-//        @Header("Authorization") token: String,
-//        @Body productRequest: ProductReq,
-//    ): Response<>
-//
-//    @DELETE("products/{id}")
-//    suspend fun deleteProduct(
-//        @Header("Authorization") token: String,
-//        @Path("id") productId: Int,
-//    ): Response<Unit>
+
 }
 

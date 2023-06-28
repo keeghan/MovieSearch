@@ -17,7 +17,7 @@ import androidx.compose.ui.unit.sp
 import com.keeghan.movieinfo.models.shows.Result
 import com.keeghan.movieinfo.repository.paging.extractId
 import com.keeghan.movieinfo.ui.screens.SmallText
-import com.keeghan.movieinfo.utils.smallSpace
+import com.keeghan.movieinfo.utils.SmallSpaceH
 
 
 @Composable
@@ -29,7 +29,7 @@ fun MovieCard(
         modifier = Modifier
             .width(150.dp)
             .height(270.dp)
-            .clickable { onMovieClick(extractId(movie.id)) }
+            .clickable { onMovieClick(extractId(movie.id)!!) }
     ) {
         Column {
             CardImage(url = movie?.image?.url, title = movie.title)
@@ -44,7 +44,7 @@ fun MovieCard(
                     overflow = TextOverflow.Ellipsis,
                     lineHeight = 13.sp,
                 )
-                smallSpace()
+                SmallSpaceH()
                 Row {
                     SmallText(text = movie.year.toString())
                     SmallText(text = movie.year.toString())

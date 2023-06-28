@@ -6,6 +6,9 @@ class Constants {
         const  val apiKey = "05e6730769msh8be126a82e98228p152258jsn6e7ef464b37f"
         const val apiKey2 = "0cfeeaf602msh36e2e39fcdc3c3bp1d1bc6jsnfc4711b1304e"
 
+        const val apiKey3 = "90ef77e7e9msh871b552183aa907p17af6fjsn5b4876d23d66"
+        const val host = "online-movie-database.p.rapidapi.com"
+
 
         const val CHECK_CAPITAL = "[A-Z]"
         const val CHECK_SYMBOL_DIGIT = "[!@#\\\$%^&*(),.?\\\":{}|<>0-9]"

@@ -1,4 +1,4 @@
-package com.keeghan.movieinfo.models.movieOverview
+package com.keeghan.movieinfo.models
 
 
 import com.google.gson.annotations.SerializedName
@@ -7,9 +7,9 @@ data class MovieOverViewResponse(
     val certificates: Certificates,
     val genres: List<String>,
     val id: String, // /title/tt0944947/
-    val plotOutline: PlotOutline,
-    val plotSummary: PlotSummary,
-    val ratings: Ratings,
+    val plotOutline: PlotOutline?,
+    val plotSummary: PlotSummary?,
+    val ratings: Ratings?,
     val releaseDate: String, // 2011-04-17
     val title: Title
 ) {
@@ -25,13 +25,13 @@ data class MovieOverViewResponse(
 
     data class PlotOutline(
         val id: String, // /title/tt0944947/plot/po2596634
-        val text: String // Nine noble families fight for control over the lands of Westeros, while an ancient enemy returns after being dormant for millennia.
+        val text: String? // Nine noble families fight for control over the lands of Westeros, while an ancient enemy returns after being dormant for millennia.
     )
 
     data class PlotSummary(
-        val author: String, // Sam Gray
-        val id: String, // /title/tt0944947/plot/ps2733843
-        val text: String // In the mythical continent of Westeros, several powerful families fight for control of the Seven Kingdoms. As conflict erupts in the kingdoms of men, an ancient enemy rises once again to threaten them all. Meanwhile, the last heirs of a recently usurped dynasty plot to take back their homeland from across the Narrow Sea.
+        val author: String?, // Sam Gray
+        val id: String?, // /title/tt0944947/plot/ps2733843
+        val text: String? // In the mythical continent of Westeros, several powerful families fight for control of the Seven Kingdoms. As conflict erupts in the kingdoms of men, an ancient enemy rises once again to threaten them all. Meanwhile, the last heirs of a recently usurped dynasty plot to take back their homeland from across the Narrow Sea.
     )
 
     data class Ratings(
@@ -50,7 +50,7 @@ data class MovieOverViewResponse(
 
     data class Title(
         val id: String, // /title/tt0944947/
-        val image: Image,
+        val image: Image?,
         val nextEpisode: String, // /title/tt1480055/
         val numberOfEpisodes: Int, // 73
         val runningTimeInMinutes: Int, // 57

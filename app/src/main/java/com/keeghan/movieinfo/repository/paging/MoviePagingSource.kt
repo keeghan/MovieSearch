@@ -11,8 +11,9 @@ import java.io.IOException
 
 class MoviePagingSource(
     private val api: IMDBApi,
-    private val movieTile: String,
-                       ) : PagingSource<Int, Result>() {
+    private val title: String,
+    private val types: String?
+) : PagingSource<Int, Result>() {
     override fun getRefreshKey(state: PagingState<Int, Result>): Int? {
         return state.anchorPosition?.let { pos ->
             state.closestPageToPosition(pos)?.prevKey?.plus(1)
@@ -20,12 +21,11 @@ class MoviePagingSource(
         }
     }
 
-
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, Result> {
 
         return try {
             val page = params.key ?: 1
-            val response = api.findTitle(title = movieTile, page = page)
+            val response = api.findTitle(title = title, page = page, type = types)
             val data = response.body()?.results ?: emptyList()
             Log.i("findTitle", "pagingsource")
 
@@ -40,11 +40,19 @@ class MoviePagingSource(
             LoadResult.Page(
                 data = data,
                 prevKey = if (page == 1) null else page.minus(1),
-                nextKey = if (data.isEmpty()) null else page.plus(1))
+                nextKey = if (data.isEmpty()) null else page.plus(1)
+            )
         } catch (e: IOException) {
             LoadResult.Error(e)
         } catch (e: HttpException) {
             LoadResult.Error(e)
         }
     }
+}
+
+
+fun extractId(url: String): String? {
+    val pattern = "/title/(\\w+)/".toRegex()
+    val matchResult = pattern.find(url)
+    return matchResult?.groupValues?.get(1)
 }

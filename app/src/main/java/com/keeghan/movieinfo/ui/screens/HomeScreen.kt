@@ -9,12 +9,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.material3.Card
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -24,9 +21,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.keeghan.movieinfo.models.movieOverview.MovieOverViewResponse
+import com.keeghan.movieinfo.models.MovieOverViewResponse
 import com.keeghan.movieinfo.ui.components.CardImage
-import com.keeghan.movieinfo.utils.smallSpace
+import com.keeghan.movieinfo.utils.SmallSpaceH
 import com.keeghan.movieinfo.viewModel.EpisodeViewModel
 
 @Composable
@@ -36,7 +33,7 @@ fun HomeScreen(
 ) {
     var isButtonClicked by remember { mutableStateOf(false) }
 
-    val movieResponse by productsViewModel.popularMovieResponse.observeAsState()
+   // val movieResponse by productsViewModel.popularMovieResponse.observeAsState()
 
     Column(modifier = Modifier.then(modifier)) {
         Text(text = "Popular Movies")
@@ -47,17 +44,17 @@ fun HomeScreen(
                 6.dp, Alignment.CenterHorizontally
             )
         ) {
-            movieResponse?.let {
-                items(count = it.size) { loc ->
-                    PopularMovieCard(movie = movieResponse!![loc])
-                }
-            }
+//            movieResponse?.let {
+//                items(count = it.size) { loc ->
+//                    PopularMovieCard(movie = movieResponse!![loc])
+//                }
+//            }
         }
-        if (movieResponse?.isEmpty() == true) {
-            OutlinedButton(onClick = { isButtonClicked = true }) {
-                Text(text = "Reload")
-            }
-        }
+//        if (movieResponse?.isEmpty() == true) {
+//            OutlinedButton(onClick = { isButtonClicked = true }) {
+//                Text(text = "Reload")
+//            }
+//        }
     }
 }
 
@@ -81,10 +78,10 @@ fun PopularMovieCard(movie: MovieOverViewResponse) {
                     overflow = TextOverflow.Ellipsis,
                     lineHeight = 13.sp,
                 )
-                smallSpace()
+                SmallSpaceH()
                 Row {
                     SmallText(text = movie.title.year.toString())
-                    SmallText(text = movie.releaseDate.toString())
+                    SmallText(text = movie.releaseDate)
                 }
             }
         }

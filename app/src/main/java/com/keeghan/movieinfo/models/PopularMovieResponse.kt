@@ -1,4 +1,4 @@
-package com.keeghan.movieinfo.models.popularMovies
+package com.keeghan.movieinfo.models
 
 
 class PopularMovieResponse (): ArrayList<String>()

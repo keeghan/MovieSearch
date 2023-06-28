@@ -25,6 +25,9 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background
                 ) {
                     RootNavGraph(navController = rememberNavController()) //Hello
+                    // InfoScreen(navController = rememberNavController(), movieId = "tt0944947")
+                    // InfoScreen(navController = rememberNavController(), movieId = "tt5861236")
+                    // PreviewScreen("tt0944947")
                 }
             }
         }

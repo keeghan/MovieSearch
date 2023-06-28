@@ -9,6 +9,8 @@ import com.keeghan.movieinfo.utils.Constants.Companion.RETROFIT_READ_TIMEOUT
 import com.keeghan.movieinfo.utils.Constants.Companion.RETROFIT_WRITE_TIMEOUT
 import com.keeghan.movieinfo.utils.Constants.Companion.apiKey
 import com.keeghan.movieinfo.utils.Constants.Companion.apiKey2
+import com.keeghan.movieinfo.utils.Constants.Companion.apiKey3
+import com.keeghan.movieinfo.utils.Constants.Companion.host
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -41,8 +43,8 @@ object AppServiceModule {
         //application intercept for RAPIDApi
         okHttpClient.addInterceptor { chain ->
             val request = chain.request().newBuilder()
-                .addHeader("X-RapidAPI-Key", apiKey2)
-                .addHeader("X-RapidAPI-Host", "imdb8.p.rapidapi.com")
+                .addHeader("X-RapidAPI-Key", apiKey3)
+                .addHeader("X-RapidAPI-Host", host)
                 .build()
             chain.proceed(request)
         }

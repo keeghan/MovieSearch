@@ -7,7 +7,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.keeghan.movieinfo.utils.Space
+import com.keeghan.movieinfo.utils.SpaceH
 
 @Composable
 fun ProfileScreen() {
@@ -15,7 +15,7 @@ fun ProfileScreen() {
         Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-            Space(side = 50.dp)
+            SpaceH(side = 50.dp)
             Text(text = "ProfileScreen")
     }
 }

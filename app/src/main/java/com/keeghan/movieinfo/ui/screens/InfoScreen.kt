@@ -1,26 +1,706 @@
 package com.keeghan.movieinfo.ui.screens
 
+import android.widget.Toast
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.core.EaseOut
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsDraggedAsState
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerState
+import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.ripple.rememberRipple
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Divider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.layout
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import com.keeghan.movieinfo.utils.Space
+import com.keeghan.movieinfo.R
+import com.keeghan.movieinfo.models.MovieImagesResponse
+import com.keeghan.movieinfo.models.MovieOverViewResponse
+import com.keeghan.movieinfo.models.MovieParentalGuideResponse
+import com.keeghan.movieinfo.ui.components.rememberStarRate
+import com.keeghan.movieinfo.utils.MovieImageProvider
+import com.keeghan.movieinfo.utils.MutableRatingStar
+import com.keeghan.movieinfo.utils.SmallSpaceH
+import com.keeghan.movieinfo.utils.SpaceH
+import com.keeghan.movieinfo.utils.SpaceW
+import com.keeghan.movieinfo.viewModel.ApiCallState
+import com.keeghan.movieinfo.viewModel.MovieDetailsViewModel
+import com.touchlane.gridpad.GridPad
+import com.touchlane.gridpad.GridPadCellSize
+import com.touchlane.gridpad.GridPadCells
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun InfoScreen(
     navController: NavController,
     movieId: String,
+    viewModel: MovieDetailsViewModel = hiltViewModel()
+) {
+    val uiState = viewModel.uiState.collectAsState()
+    val movieOverView by viewModel.movieOverViewResponse.observeAsState()
+    val movieImages by viewModel.movieImagesResponse.observeAsState()
+    val moviePgScores by viewModel.pgResponse.observeAsState()
+
+    val error by viewModel.errorMsg
+
+    //remove large images to save data and prevent Canvas errors
+    val images = movieImages?.images?.filter { it.width < 2000 && it.height <= 2000 }
+
+    LaunchedEffect(Unit) {
+        viewModel.findOverView(movieId)
+        viewModel.getParentalGuidance(movieId)
+    }
+
+    Column(  //main
+        Modifier.verticalScroll(rememberScrollState())
+            .fillMaxSize()
+            .padding(10.dp), horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+
+        //Use appropriate action on according to UiState
+        when (uiState.value.overViewState) {
+            ApiCallState.SUCCESS -> {
+                //Title
+                TitleScreen(overview = movieOverView!!)
+                //Carousel
+                Spacer(modifier = Modifier.height(3.dp))
+                if (images.isNullOrEmpty()) {
+                    MovieImageProvider(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(250.dp)
+                            .layout { measurable, constraints ->
+                                val placeable = measurable.measure(
+                                    constraints.copy(
+                                        maxWidth = constraints.maxWidth + 20.dp.roundToPx(), //add the end padding 16.dp
+                                    )
+                                )
+                                layout(placeable.width, placeable.height) {
+                                    placeable.place(0, 0)
+                                }
+                            }, contentScale = ContentScale.FillHeight
+                    )
+                } else {
+                    ImageSlider(images = images)
+                }
+                Spacer(modifier = Modifier.height(5.dp))
+                //Plot
+                PlotSection(
+                    movieOverView!!.title.image,
+                    movieOverView!!.genres,
+                    plot = movieOverView?.plotOutline?.text
+                )
+                LongDivider()
+                //Ratings
+                RatingSection(
+                    userRaters = movieOverView!!.ratings?.ratingCount,
+                    rating = movieOverView!!.ratings?.rating,
+                    metaScore = 90,  //TODO: Api Limitation
+                    metaCriticsNum = 80 //TODO: Api Limitation
+                )
+                Spacer(modifier = Modifier.height(5.dp))
+                NotificationSection()
+
+                /* Ratings Sections*/
+                when (uiState.value.pgState) {
+                    ApiCallState.SUCCESS -> {
+                        SpaceH(side = 20.dp)
+                        if (moviePgScores?.parentalguide?.isNotEmpty() == true) {
+                            ParentsGuideSection(parentalGuides = moviePgScores!!.parentalguide)
+                        }
+                    }
+                    ApiCallState.LOADING -> {
+                        Column(
+                            Modifier.fillMaxSize(),
+                            verticalArrangement = Arrangement.Center,
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            CircularProgressIndicator()
+                        }
+                    }
+                    else -> { } //error handling and idle state done in outer calls
+                }
+            }
+
+            ApiCallState.LOADING -> {
+                Column(
+                    Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    CircularProgressIndicator()
+                }
+            }
+
+            ApiCallState.ERROR -> {
+                val errorMessage = error.ifBlank { "unknown error" }
+                Toast.makeText(LocalContext.current, errorMessage, Toast.LENGTH_SHORT).show()
+
+                Column(
+                    Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Button(onClick = { viewModel.findOverView(movieId) }) {
+                        Text(text = "Reload")
+                    }
+                }
+            }
+
+            ApiCallState.IDLE -> {
+                //Shows up on first Run...Do nothing
+            }
+        }
+    }
+
+}  //End of Main Composable
+
+//Section of Movie [Title] details
+@Composable
+fun TitleScreen(overview: MovieOverViewResponse) {
+    val isTvSeries = overview.title.titleType == "tvSeries"
+    val isMovie = overview.title.titleType == "movie"
+    val text = overview.title.title
+
+    val textSize = when (text.length) {
+        in 0..10 -> MaterialTheme.typography.displayMedium
+        in 11..20 -> MaterialTheme.typography.displaySmall
+        else -> MaterialTheme.typography.titleLarge
+    }
+
+    Column(
+        Modifier.fillMaxWidth()
+    ) {
+        Text(
+            text = overview.title.title,
+            style = textSize
+        )
+        Row {//Texts
+            Text(
+                text = overview.title.titleType,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.padding(end = 10.dp)
+            )
+            if (isTvSeries) {
+                val time = "${overview.title.seriesStartYear} - ${overview.title.seriesEndYear}"
+                TitleText(text = time)
+            } else if (isMovie) {
+                TitleText(text = overview.title.year.toString())
+                TitleText(text = overview.certificates.uS[0].certificate)
+            }
+            TitleText(text = timeToStr(overview.title.runningTimeInMinutes))
+        }
+        if (isTvSeries) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(text = "EPISODE GUIDE",
+                    Modifier
+                        .padding(start = 0.dp, end = 10.dp)
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = rememberRipple(color = MaterialTheme.colorScheme.primary)
+                        ) {})
+                TitleText(
+                    text = overview.title.numberOfEpisodes.toString() + " episodes"
+                )
+            }
+        }
+    }
+}
+
+
+@Composable
+fun TitleText(text: String) {
+    Text(text = text, modifier = Modifier.padding(end = 10.dp))
+}
+
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun ImageSlider(
+    images: List<MovieImagesResponse.Image>,
+    pagerState: PagerState = rememberPagerState(),
+    autoScrollDuration: Long = 6000L
+) {
+    //create pagerState with auto scroll
+    val pageCount = images.size
+    val isDragged by pagerState.interactionSource.collectIsDraggedAsState()
+    if (isDragged.not()) {
+        with(pagerState) {
+            var currentPageKey by remember { mutableIntStateOf(0) }
+            LaunchedEffect(key1 = currentPageKey) {
+                launch {
+                    delay(timeMillis = autoScrollDuration)
+                    val nextPage = (currentPage + 1).mod(pageCount)
+                    animateScrollToPage(page = nextPage)
+                    currentPageKey = nextPage
+                }
+            }
+        }
+    }
+
+    HorizontalPager(
+        modifier = Modifier.layout { measurable, constraints ->
+            val placeable = measurable.measure(
+                constraints.copy(
+                    maxWidth = constraints.maxWidth + 20.dp.roundToPx(), //add the end padding 16.dp
+                )
+            )
+            layout(placeable.width, placeable.height) {
+                placeable.place(0, 0)
+            }
+        }, pageCount = images.size, state = pagerState
+    ) {
+        val image = images[it]
+        val isImageTooLarge = image.height > 2500 || image.width > 2500
+        Box(contentAlignment = Alignment.BottomStart) {
+            //do not render large images
+            MovieImageProvider(
+                url = if (isImageTooLarge) "null" else image.url,
+                contentDescription = if (isImageTooLarge) "Image too large" else image.caption,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(250.dp)
+            )
+            Text(text = if (isImageTooLarge) "Image too large" else image.caption)
+        }
+    }
+}
+
+//Plot section with image, genre and plot
+@Composable
+private fun PlotSection(
+    image: MovieOverViewResponse.Title.Image?,
+    genres: List<String>?,
+    plot: String? = "No plot available"
 ) {
     Column(
-        Modifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally
+        Modifier
+            .fillMaxWidth()
+            .height(IntrinsicSize.Max)
     ) {
-        Space(side = 50.dp)
-        Text(text = "InfoScreen")
-        Text(text = movieId)
+        Row {
+            var isImageTooLarge = false
+            if (image != null) {
+                isImageTooLarge = image.height > 2500 || image.width > 2500
+            }
+            MovieImageProvider(
+                url = if (isImageTooLarge || image == null) "null" else image.url,
+                contentDescription = "Movie poster",
+                contentScale = ContentScale.FillHeight,
+                modifier = Modifier
+                    .height(180.dp)
+                    .widthIn(max = 140.dp),
+                error = painterResource(R.drawable.ic_launcher_background)
+            )
+            Spacer(modifier = Modifier.width(10.dp))
+            Column {
+                Row(modifier = Modifier.horizontalScroll(rememberScrollState())) {
+                    genres?.forEach {
+                        Text(
+                            text = it,
+                            modifier = Modifier
+                                .height(intrinsicSize = IntrinsicSize.Min)
+                                .padding(end = 0.dp)
+                                .border(
+                                    BorderStroke(1.dp, MaterialTheme.colorScheme.primary),
+                                    shape = RoundedCornerShape(4.dp)
+                                )
+                                .padding(start = 5.dp, end = 5.dp, top = 8.dp, bottom = 8.dp)
+                        )
+                        Spacer(modifier = Modifier.width(10.dp))
+                    }
+                }
+                Spacer(modifier = Modifier.height(15.dp))
+                val n = plot ?: "No plot available"
+                Text(
+                    style = MaterialTheme.typography.bodyMedium,
+                    text = limitToFirstSentence(n),
+                )
+            }
+        }
+        Spacer(modifier = Modifier.height(15.dp))
+        WatchListButton()
     }
+}
+
+//WatchList Huge Button
+@OptIn(ExperimentalAnimationApi::class)
+@Composable
+fun WatchListButton() {
+    var isWatchListed by remember { mutableStateOf(false) }   //User feature not implemented
+
+    AnimatedContent(
+        targetState = isWatchListed,
+        //transitionSpec = {}
+    ) {
+        val icon = if (it) Icons.Default.Check else Icons.Default.Add
+        val text = if (it) "Added to Watchlist" else "Add to Watchlist"
+        val borderSize = if (it) 1.dp else 0.dp
+        val textColor = if (it) MaterialTheme.colorScheme.onBackground else Color.Black
+
+        Card(
+            border = BorderStroke(
+                borderSize, MaterialTheme.colorScheme.primary
+            ), shape = RoundedCornerShape(6.dp)
+        ) {
+            Row(
+                if (it) Modifier.fillMaxWidth() else Modifier
+                    .fillMaxWidth()
+                    .background(MaterialTheme.colorScheme.primary),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                IconButton(onClick = {
+                    isWatchListed = !isWatchListed
+                }) { //Click action, animation trigger
+                    Icon(
+                        imageVector = icon, contentDescription = "add to playlist", tint = textColor
+                    )
+                }
+                Column {
+                    Text(
+                        color = textColor,
+                        style = MaterialTheme.typography.bodyMedium,
+                        text = text,
+                    )
+                    Text(
+                        color = textColor,
+                        style = MaterialTheme.typography.bodySmall,
+                        text = "Added by 100K users",   //not queried
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun LongDivider() {
+    Divider(thickness = 2.dp,
+        modifier = Modifier
+            .padding(top = 20.dp, bottom = 10.dp)
+            .layout { measurable, constraints ->
+                val placeable = measurable.measure(
+                    constraints.copy(
+                        maxWidth = constraints.maxWidth + 20.dp.roundToPx(), //add the end padding 16.dp
+                    )
+                )
+                layout(placeable.width, placeable.height) {
+                    placeable.place(0, 0)
+                }
+            })
+}
+
+@Composable
+fun RatingSection(
+    userRaters: Int? = 0, rating: Double? = 0.0, metaScore: Int, metaCriticsNum: Int
+) {
+    val backgroundColor = if (metaScore > 70) MovieColors.DeepGreen else Color.Red
+
+    val star = rememberStarRate(
+        fillColor = Color.Yellow,
+    )
+
+    /*Experimental use of External Library
+    * use of Row in every item to center*/
+    Column(Modifier.fillMaxWidth()) {
+        GridPad(
+            modifier = Modifier
+                .height(80.dp)
+                .fillMaxWidth(),
+            cells = GridPadCells.Builder(rowCount = 3, columnCount = 3)
+                .rowSize(index = 0, size = GridPadCellSize.Weight(2f)).build()
+        ) {
+            item {
+                Image(star, contentDescription = "ratings")
+            }
+            item { MutableRatingStar() }
+            item {
+                Row(
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        color = Color.White,
+                        style = MaterialTheme.typography.titleMedium,
+                        text = metaScore.toString(),
+                        modifier = Modifier.background(backgroundColor)
+                    )
+                }
+            }
+            item {
+                Row(
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        "$rating",
+                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                    Text("/10")
+                }
+            }
+
+            item {
+                Row(
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text("Rate this", color = MaterialTheme.colorScheme.secondary)
+                }
+            }
+            item {
+                Row(
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(text = "MetaScore", modifier = Modifier)
+                }
+            }
+            item {
+                Row(
+                    horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.Top
+                ) {
+                    Text(
+                        text = "$userRaters critics",
+                        modifier = Modifier,
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
+            }
+            item {
+                Row(
+                    horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.Top
+                ) {
+                    Text(text = "", style = MaterialTheme.typography.bodySmall)
+                }
+            }
+            item {
+                Row(
+                    horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.Top
+                ) {
+                    Text(
+                        text = "$metaCriticsNum critics",
+                        modifier = Modifier,
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
+            }
+        }
+    }
+}
+
+
+@Preview
+@Composable
+fun NotificationSection() {
+    var isChecked by remember { mutableStateOf(false) }
+
+    AnimatedVisibility(
+        visible = !isChecked, exit = fadeOut(
+            animationSpec = tween(300, 0, easing = EaseOut)
+        )
+    ) {
+        Row(
+            Modifier
+                .fillMaxWidth()
+                .padding(10.dp), horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Column(Modifier.weight(0.8f)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(Icons.Default.Notifications, contentDescription = "notifications")
+                    Text(
+                        text = "Turn on notifications", style = MaterialTheme.typography.titleMedium
+                    )
+                }
+                //  Spacer(Modifier.padding(bottom = 5.dp))
+                Text(
+                    text = "Get notified when items in your Watchlist become available",
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.padding(start = 5.dp)
+                )
+            }
+            Switch(modifier = Modifier.scale(0.7f),
+                checked = isChecked,
+                thumbContent = { SwitchDefaults.IconSize },
+                onCheckedChange = { isChecked = it })
+        }
+    }
+}
+
+@Composable
+fun ParentsGuideSection(parentalGuides: List<MovieParentalGuideResponse.Parentalguide>) {
+    Column {
+        Row(
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Row {
+                Box(
+                    modifier = Modifier
+                        .height(25.dp)
+                        .width(3.dp)
+                        .background(MaterialTheme.colorScheme.primary)
+                )
+                Spacer(modifier = Modifier.width(5.dp))
+                Text(text = "Parent's Guide")
+            }
+            Text(text = "SEE ALL",
+                modifier = Modifier
+                    .padding(end = 10.dp)
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = rememberRipple(color = MaterialTheme.colorScheme.primary)
+                    ) {})
+        }
+        SmallSpaceH()
+        Column(modifier = Modifier.padding(start = 5.dp)) {
+            Text(text = "Content Rating", modifier = Modifier.padding(bottom = 0.dp))
+            Text(
+                text = "view content advisory",
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.alpha(0.7f)
+            )
+        }
+        SpaceH(15.dp)
+        Column(modifier = Modifier.padding(start = 10.dp)) {
+            parentalGuides.forEach { guide ->
+                val bgColor: Color = when (guide.severityVotes.status) {
+                    "none" -> Color.Green
+                    "mild" -> Color.Yellow
+                    "moderate" -> MovieColors.Orange
+                    "severe" -> Color.Red
+                    else -> {
+                        Color.Transparent
+                    }
+                }
+                val label: String = when (guide.label) {
+                    "nudity" -> "Sex and nudity:  "
+                    "violence" -> "Violence and gore:  "
+                    "profanity" -> "Profanity:  "
+                    "alcohol" -> "Alcohol, drugs and smoking:  "
+                    "frightening" -> "Frightening and intense scenes:  "
+                    else -> {
+                        " "
+                    }
+                }
+                val guideValue = guide.severityVotes.status.replaceFirstChar { it.uppercase() }
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Card(
+                        modifier = Modifier
+                            .height(25.dp)
+                            .width(12.dp),
+                        shape = RoundedCornerShape(1.dp),
+                        colors = CardDefaults.cardColors(containerColor = bgColor),
+                        content = {}
+                    )
+                    SpaceW(side = 10.dp)
+                    Text(label)
+                    Text(guideValue, modifier = Modifier.alpha(0.5f))
+                }
+                SpaceH(10.dp)
+            } //end of loop
+        }
+    }
+}
+
+
+//@Preview
+//@Composable
+//fun PreviewSec() {
+//    RatingSection(userRaters = 155455, metaScore = 90, metaCriticsNum = 15, rating = 8.2)
+//}
+
+fun limitToFirstSentence(text: String): String {
+    val firstSentenceEnd = text.indexOfAny(charArrayOf('.', '!', '?'))
+    return if (firstSentenceEnd != -1) {
+        text.substring(0, firstSentenceEnd + 1)
+    } else {
+        text
+    }
+}
+
+
+fun timeToStr(minutes: Int): String {
+    val hours = minutes / 60
+    val minutesStr = if (minutes % 60 < 10) {
+        "0${minutes % 60}"
+    } else {
+        "${minutes % 60}"
+    }
+    return if (hours > 0) {
+        "${hours}h ${minutesStr}m"
+    } else {
+        "${minutesStr}m"
+    }
+}
+
+
+object MovieColors {
+    val DeepGreen = Color(0xFF388E3C)
+    val Orange = Color(0xFFF57C00)
 }
