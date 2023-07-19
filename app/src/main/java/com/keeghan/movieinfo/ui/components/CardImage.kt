@@ -1,5 +1,6 @@
 package com.keeghan.movieinfo.ui.components
 
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
@@ -25,7 +26,7 @@ fun CardImage(url: String?, title: String) {
         contentDescription = title,
         contentScale = ContentScale.Crop,
         modifier = Modifier
-            .width(170.dp)
+            .fillMaxWidth()
             .height(190.dp)
     )
 }

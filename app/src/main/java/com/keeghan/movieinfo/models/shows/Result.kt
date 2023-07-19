@@ -1,6 +1,10 @@
 package com.keeghan.movieinfo.models.shows
 
-
+/**
+ * Data class that represents a movie as part of
+ * the [ShowsResponse] object recieved from the
+ * IMDBApi
+ * */
 data class Result(
     val episode: Int, // 314
     val id: String, // /title/tt0944947/

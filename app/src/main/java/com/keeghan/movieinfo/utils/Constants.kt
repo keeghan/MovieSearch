@@ -26,7 +26,7 @@ class Constants {
 
 
         //values
-        const val RETROFIT_READ_TIMEOUT: Long = 15
+        const val RETROFIT_READ_TIMEOUT: Long = 30
         const val RETROFIT_WRITE_TIMEOUT: Long = 11
         const val RETROFIT_CONNECT_TIMEOUT: Long = 11
 

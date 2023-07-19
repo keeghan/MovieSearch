@@ -7,14 +7,14 @@ import com.keeghan.movieinfo.models.MovieImagesResponse
 import com.keeghan.movieinfo.models.MovieOverViewResponse
 import com.keeghan.movieinfo.models.MovieParentalGuideResponse
 import com.keeghan.movieinfo.models.shows.Result
-import com.keeghan.movieinfo.network.IMDBApi
+import com.keeghan.movieinfo.network.MovieApi
 import com.keeghan.movieinfo.repository.paging.MoviePagingSource
 import kotlinx.coroutines.flow.Flow
 import retrofit2.Response
 import javax.inject.Inject
 
 class EpisodeRepositoryImpl
-@Inject constructor(private val api: IMDBApi) : EpisodeRepository {
+@Inject constructor(private val api: MovieApi) : EpisodeRepository {
 
 
 //    override suspend fun findTitle(title: String, page: Int?): Response<ShowsResponse> {

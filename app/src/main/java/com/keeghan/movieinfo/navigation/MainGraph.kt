@@ -11,28 +11,28 @@ import com.keeghan.movieinfo.ui.screens.SearchScreen
 import com.keeghan.movieinfo.ui.screens.VideoScreen
 
 @Composable
-fun MainNavGraph(
+fun BottomNavGraph(
     modifier: Modifier,
     navController: NavHostController,
     onMovieCardClick: (String) -> Unit
 ) {
     NavHost(
         navController = navController,
-        route = Graph.BOTTOM_NAV,
-        startDestination = BottomBarScreen.Home.route
+        route = Graph.BOTTOM_NAV_GRAPH,
+        startDestination = BottomBarDestination.Search.route   //Home.route
     ) {
-        composable(route = BottomBarScreen.Home.route) {
+        composable(route = BottomBarDestination.Home.route) {
             HomeScreen(modifier)
         }
-        composable(route = BottomBarScreen.Search.route) {
+        composable(route = BottomBarDestination.Search.route) {
             SearchScreen(modifier, navController) { id ->
                 onMovieCardClick(id)
             }
         }
-        composable(route = BottomBarScreen.Video.route) {
+        composable(route = BottomBarDestination.Video.route) {
             VideoScreen()
         }
-        composable(route = BottomBarScreen.Profile.route) {
+        composable(route = BottomBarDestination.Profile.route) {
             ProfileScreen()
         }
     }

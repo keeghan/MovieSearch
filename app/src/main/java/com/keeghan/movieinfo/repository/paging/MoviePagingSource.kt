@@ -4,13 +4,13 @@ import android.util.Log
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import com.keeghan.movieinfo.models.shows.Result
-import com.keeghan.movieinfo.network.IMDBApi
+import com.keeghan.movieinfo.network.MovieApi
 import retrofit2.HttpException
 import java.io.IOException
 
 
 class MoviePagingSource(
-    private val api: IMDBApi,
+    private val api: MovieApi,
     private val title: String,
     private val types: String?
 ) : PagingSource<Int, Result>() {
@@ -30,7 +30,11 @@ class MoviePagingSource(
             Log.i("findTitle", "pagingsource")
 
             if (!response.isSuccessful) {
-                return LoadResult.Error(Exception(response.message()))
+                var msg = response.code().toString() + response.message()
+                if (msg.contains( "503")) {
+                    msg = "Service Unavailable"
+                }
+                return LoadResult.Error(Exception(msg))
             } else {
                 if (response.body()?.results == null) {
                     return LoadResult.Error(Exception("no matches"))

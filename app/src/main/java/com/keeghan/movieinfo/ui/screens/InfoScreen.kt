@@ -76,11 +76,10 @@ import androidx.navigation.NavController
 import com.keeghan.movieinfo.R
 import com.keeghan.movieinfo.models.MovieImagesResponse
 import com.keeghan.movieinfo.models.MovieOverViewResponse
-import com.keeghan.movieinfo.models.MovieParentalGuideResponse
+import com.keeghan.movieinfo.models.ParentalGuide
 import com.keeghan.movieinfo.ui.components.rememberStarRate
 import com.keeghan.movieinfo.utils.MovieImageProvider
 import com.keeghan.movieinfo.utils.MutableRatingStar
-import com.keeghan.movieinfo.utils.SmallSpaceH
 import com.keeghan.movieinfo.utils.SpaceH
 import com.keeghan.movieinfo.utils.SpaceW
 import com.keeghan.movieinfo.viewModel.ApiCallState
@@ -90,31 +89,40 @@ import com.touchlane.gridpad.GridPadCellSize
 import com.touchlane.gridpad.GridPadCells
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 
+/**
+ * A composable that is used to display an the details of a show
+ * @param movieId  is a string received from the NavBackStackEntry use to make calls to to the [viewModel]
+ * @param navController passed from when InfoScreen is called for navigation
+ * @param viewModel makes calls with [movieId]
+ */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun InfoScreen(
     navController: NavController,
     movieId: String,
-    viewModel: MovieDetailsViewModel = hiltViewModel()
+    viewModel: MovieDetailsViewModel = hiltViewModel(),
+    onContentAdvisoryClick: (String) -> Unit
 ) {
     val uiState = viewModel.uiState.collectAsState()
     val movieOverView by viewModel.movieOverViewResponse.observeAsState()
     val movieImages by viewModel.movieImagesResponse.observeAsState()
     val moviePgScores by viewModel.pgResponse.observeAsState()
 
-    val error by viewModel.errorMsg
-
     //remove large images to save data and prevent Canvas errors
     val images = movieImages?.images?.filter { it.width < 2000 && it.height <= 2000 }
 
+    //Make Api calls when composable is launched
     LaunchedEffect(Unit) {
         viewModel.findOverView(movieId)
         viewModel.getParentalGuidance(movieId)
     }
 
-    Column(  //main
-        Modifier.verticalScroll(rememberScrollState())
+    Column(
+        Modifier
+            .verticalScroll(rememberScrollState())
             .fillMaxSize()
             .padding(10.dp), horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -163,14 +171,20 @@ fun InfoScreen(
                 Spacer(modifier = Modifier.height(5.dp))
                 NotificationSection()
 
-                /* Ratings Sections*/
+                /* Ratings Sections: check that ratings have successfully loaded and display Ratings Section*/
                 when (uiState.value.pgState) {
                     ApiCallState.SUCCESS -> {
                         SpaceH(side = 20.dp)
                         if (moviePgScores?.parentalguide?.isNotEmpty() == true) {
-                            ParentsGuideSection(parentalGuides = moviePgScores!!.parentalguide)
+                            //turn pgObject to string to pass as nav argument
+                            val pgString = Json.encodeToString(moviePgScores)
+
+                            ParentsGuideSection(
+                                parentalGuides = moviePgScores!!.parentalguide
+                            ) { onContentAdvisoryClick( pgString) }   //pass parentalGuidance objectString upwards
                         }
                     }
+
                     ApiCallState.LOADING -> {
                         Column(
                             Modifier.fillMaxSize(),
@@ -180,7 +194,8 @@ fun InfoScreen(
                             CircularProgressIndicator()
                         }
                     }
-                    else -> { } //error handling and idle state done in outer calls
+
+                    else -> {} //error handling and idle state done in outer calls
                 }
             }
 
@@ -195,8 +210,12 @@ fun InfoScreen(
             }
 
             ApiCallState.ERROR -> {
-                val errorMessage = error.ifBlank { "unknown error" }
-                Toast.makeText(LocalContext.current, errorMessage, Toast.LENGTH_SHORT).show()
+                val errorMessage = uiState.value.titleApiError.ifBlank { "unknown error" }
+                Toast.makeText(
+                    LocalContext.current,
+                    uiState.value.titleApiError,
+                    Toast.LENGTH_SHORT
+                ).show()
 
                 Column(
                     Modifier.fillMaxSize(),
@@ -217,7 +236,12 @@ fun InfoScreen(
 
 }  //End of Main Composable
 
-//Section of Movie [Title] details
+
+/**
+ * Composable that shows the tile of show/Movie
+ * Displays main title,dates, Pg ratings etc..
+ * @param overview represents a the response body from an Api
+ * */
 @Composable
 fun TitleScreen(overview: MovieOverViewResponse) {
     val isTvSeries = overview.title.titleType == "tvSeries"
@@ -243,15 +267,20 @@ fun TitleScreen(overview: MovieOverViewResponse) {
                 color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.padding(end = 10.dp)
             )
+            //Display "start - End year" if series otherwise just date
             if (isTvSeries) {
                 val time = "${overview.title.seriesStartYear} - ${overview.title.seriesEndYear}"
                 TitleText(text = time)
             } else if (isMovie) {
                 TitleText(text = overview.title.year.toString())
-                TitleText(text = overview.certificates.uS[0].certificate)
+                if (overview.certificates != null) {
+                    TitleText(text = overview.certificates.uS[0].certificate)
+                }
             }
             TitleText(text = timeToStr(overview.title.runningTimeInMinutes))
         }
+
+        //Display "Episode Guide" only if input is from a tvseries
         if (isTvSeries) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(text = "EPISODE GUIDE",
@@ -275,7 +304,14 @@ fun TitleText(text: String) {
     Text(text = text, modifier = Modifier.padding(end = 10.dp))
 }
 
-
+/**
+ * A composable that uses a @see [HorizontalPager] to display images
+ * @param images represents Images from a [MovieImagesResponse]
+ * to be displayed in a pager
+ * @param pagerState to be applied to the [HorizontalPager] to autoscroll
+ * @param autoScrollDuration reps the time till [HorizontalPager] used in
+ * [ImageSlider] autoscrolls
+ * */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ImageSlider(
@@ -286,6 +322,7 @@ fun ImageSlider(
     //create pagerState with auto scroll
     val pageCount = images.size
     val isDragged by pagerState.interactionSource.collectIsDraggedAsState()
+    //If user hasn't dragged pager in 6 seconds, auto scroll
     if (isDragged.not()) {
         with(pagerState) {
             var currentPageKey by remember { mutableIntStateOf(0) }
@@ -386,7 +423,10 @@ private fun PlotSection(
     }
 }
 
-//WatchList Huge Button
+/**
+ * Animated button to add movie to watchList, Currently
+ * not implemented (needs user feature)
+ * */
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun WatchListButton() {
@@ -453,6 +493,7 @@ fun LongDivider() {
             })
 }
 
+//User Ratings section that uses a grid
 @Composable
 fun RatingSection(
     userRaters: Int? = 0, rating: Double? = 0.0, metaScore: Int, metaCriticsNum: Int
@@ -554,6 +595,10 @@ fun RatingSection(
 }
 
 
+/**
+ * Animated button to add notification for updates, Currently
+ * not implemented (needs user feature)
+ * */
 @Preview
 @Composable
 fun NotificationSection() {
@@ -591,8 +636,18 @@ fun NotificationSection() {
     }
 }
 
+/**
+ * Composable that represents parental Guidance
+ * @param parentalGuides, a list of [ParentalGuide] objects that
+ * represents each of the categories of extreme content
+ * @param onContentAdvisoryClick method that triggers navigation
+ * [ContentAdvisoryScreen]
+ * */
 @Composable
-fun ParentsGuideSection(parentalGuides: List<MovieParentalGuideResponse.Parentalguide>) {
+fun ParentsGuideSection(
+    parentalGuides: List<ParentalGuide>,
+    onContentAdvisoryClick: () -> Unit
+) {
     Column {
         Row(
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -607,7 +662,11 @@ fun ParentsGuideSection(parentalGuides: List<MovieParentalGuideResponse.Parental
                         .background(MaterialTheme.colorScheme.primary)
                 )
                 Spacer(modifier = Modifier.width(5.dp))
-                Text(text = "Parent's Guide")
+                Text(
+                    text = "Parent's Guide",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold
+                )
             }
             Text(text = "SEE ALL",
                 modifier = Modifier
@@ -615,18 +674,28 @@ fun ParentsGuideSection(parentalGuides: List<MovieParentalGuideResponse.Parental
                     .clickable(
                         interactionSource = remember { MutableInteractionSource() },
                         indication = rememberRipple(color = MaterialTheme.colorScheme.primary)
-                    ) {})
+                    ) { onContentAdvisoryClick() }
+            )
         }
-        SmallSpaceH()
-        Column(modifier = Modifier.padding(start = 5.dp)) {
+
+        SpaceH(side = 20.dp)
+
+        Column(modifier = Modifier
+            .padding(start = 5.dp)
+            .clickable {
+                onContentAdvisoryClick()
+            }) {
             Text(text = "Content Rating", modifier = Modifier.padding(bottom = 0.dp))
             Text(
                 text = "view content advisory",
                 style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.alpha(0.7f)
+                modifier = Modifier
+                    .alpha(0.7f)
             )
         }
-        SpaceH(15.dp)
+
+        SpaceH(20.dp)
+
         Column(modifier = Modifier.padding(start = 10.dp)) {
             parentalGuides.forEach { guide ->
                 val bgColor: Color = when (guide.severityVotes.status) {

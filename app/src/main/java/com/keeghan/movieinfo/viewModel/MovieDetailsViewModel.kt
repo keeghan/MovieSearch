@@ -1,7 +1,5 @@
 package com.keeghan.movieinfo.viewModel
 
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -26,10 +24,8 @@ class MovieDetailsViewModel @Inject constructor(
     @Named("mainRepository") private val repository: EpisodeRepository,
     @Named("ioDispatcher") private val dispatcher: CoroutineDispatcher,
 ) : ViewModel() {
-    private val _uiState = MutableStateFlow(UIState(ApiCallState.IDLE, ApiCallState.IDLE))
+    private val _uiState = MutableStateFlow(UIState(ApiCallState.IDLE, ApiCallState.IDLE, "", ""))
     val uiState: StateFlow<UIState> = _uiState.asStateFlow()
-
-    var errorMsg: MutableState<String> = mutableStateOf("")  //fix repeated message
 
     private val _movieOverViewResponse = MutableLiveData<MovieOverViewResponse>()
     val movieOverViewResponse: LiveData<MovieOverViewResponse> = _movieOverViewResponse
@@ -54,15 +50,15 @@ class MovieDetailsViewModel @Inject constructor(
                     _movieImagesResponse.postValue(imagesResponse.body())
                     _uiState.update { it.copy(overViewState = ApiCallState.SUCCESS) }
                 } else {
-                    errorMsg.value = if (!response.isSuccessful) {
-                        response.message()
+                    if (!response.isSuccessful) {
+                        _uiState.update { it.copy(titleApiError = response.message()) }
                     } else {
-                        imagesResponse.message()
+                        _uiState.update { it.copy(titleApiError = imagesResponse.message()) }
                     }
                     _uiState.update { it.copy(overViewState = ApiCallState.ERROR) }
                 }
             } catch (e: Exception) {
-                errorMsg.value = e.message.toString()
+                _uiState.update { it.copy(titleApiError = e.message.toString()) }
                 _uiState.update { it.copy(overViewState = ApiCallState.ERROR) }
             }
         }
@@ -80,11 +76,11 @@ class MovieDetailsViewModel @Inject constructor(
                     _pgResponse.postValue(response.body())
                     _uiState.update { it.copy(pgState = ApiCallState.SUCCESS) }
                 } else {
-                    response.message()
+                    _uiState.update { it.copy(pgError = response.message()) }
                     _uiState.update { it.copy(pgState = ApiCallState.ERROR) }
                 }
             } catch (e: Exception) {
-                errorMsg.value = e.message.toString()
+                _uiState.update { it.copy(pgError = e.message.toString()) }
                 _uiState.update { it.copy(pgState = ApiCallState.ERROR) }
             }
         }
@@ -96,7 +92,8 @@ class MovieDetailsViewModel @Inject constructor(
 data class UIState(
     val overViewState: ApiCallState,
     val pgState: ApiCallState,
-    // val somethingState: InfoScreenUiState
+    val pgError: String,
+    val titleApiError: String
 )
 
 //States of an API call

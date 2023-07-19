@@ -1,30 +1,34 @@
 package com.keeghan.movieinfo.models
 
+import kotlinx.serialization.Serializable
 
-import com.google.gson.annotations.SerializedName
 
+@Serializable
 data class MovieParentalGuideResponse(
-    val parentalguide: List<Parentalguide>
-) {
-    data class Parentalguide(
-        val items: List<Item>,
-        val label: String,
-        val severityVotes: SeverityVotes
-    ) {
-        data class Item(
-            val hasProfanity: Boolean,
-            val id: String,
-            val isSpoiler: Boolean,
-            val language: String,
-            val text: String
-        )
+    val parentalguide: List<ParentalGuide>
+)
 
-        data class SeverityVotes(
-            val mildVotes: Int,
-            val moderateVotes: Int,
-            val noneVotes: Int,
-            val severeVotes: Int,
-            val status: String
-        )
-    }
+@Serializable
+data class ParentalGuide(
+    val items: List<Item>,
+    val label: String,
+    val severityVotes: SeverityVotes
+) {
+    @Serializable
+    data class Item(
+        val hasProfanity: Boolean,
+        val id: String,
+        val isSpoiler: Boolean,
+        val language: String,
+        val text: String
+    )
+
+    @Serializable
+    data class SeverityVotes(
+        val mildVotes: Int,
+        val moderateVotes: Int,
+        val noneVotes: Int,
+        val severeVotes: Int,
+        val status: String
+    )
 }

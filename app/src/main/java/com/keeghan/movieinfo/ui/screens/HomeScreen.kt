@@ -24,12 +24,12 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.keeghan.movieinfo.models.MovieOverViewResponse
 import com.keeghan.movieinfo.ui.components.CardImage
 import com.keeghan.movieinfo.utils.SmallSpaceH
-import com.keeghan.movieinfo.viewModel.EpisodeViewModel
+import com.keeghan.movieinfo.viewModel.SearchViewModel
 
 @Composable
 fun HomeScreen(
     modifier: Modifier,
-    productsViewModel: EpisodeViewModel = hiltViewModel()
+    productsViewModel: SearchViewModel = hiltViewModel()
 ) {
     var isButtonClicked by remember { mutableStateOf(false) }
 

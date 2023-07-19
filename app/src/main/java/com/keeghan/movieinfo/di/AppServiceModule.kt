@@ -1,14 +1,12 @@
 package com.keeghan.movieinfo.di
 
-import com.keeghan.movieinfo.network.IMDBApi
+import com.keeghan.movieinfo.network.MovieApi
 import com.keeghan.movieinfo.repository.EpisodeRepository
 import com.keeghan.movieinfo.repository.EpisodeRepositoryImpl
 import com.keeghan.movieinfo.utils.Constants.Companion.BASE_URL
 import com.keeghan.movieinfo.utils.Constants.Companion.RETROFIT_CONNECT_TIMEOUT
 import com.keeghan.movieinfo.utils.Constants.Companion.RETROFIT_READ_TIMEOUT
 import com.keeghan.movieinfo.utils.Constants.Companion.RETROFIT_WRITE_TIMEOUT
-import com.keeghan.movieinfo.utils.Constants.Companion.apiKey
-import com.keeghan.movieinfo.utils.Constants.Companion.apiKey2
 import com.keeghan.movieinfo.utils.Constants.Companion.apiKey3
 import com.keeghan.movieinfo.utils.Constants.Companion.host
 import dagger.Module
@@ -54,19 +52,19 @@ object AppServiceModule {
 
     @Provides
     @Singleton
-    fun provideRetrofit(okHttpClient: OkHttpClient.Builder): IMDBApi =
+    fun provideRetrofit(okHttpClient: OkHttpClient.Builder): MovieApi =
         Retrofit.Builder()
             .baseUrl(BASE_URL)
             .addConverterFactory(GsonConverterFactory.create())
             .client(okHttpClient.build())
             .build()
-            .create(IMDBApi::class.java)
+            .create(MovieApi::class.java)
 
 
     @Provides
     @Singleton
     @Named("mainRepository")
-    fun provideMyRepository1(api: IMDBApi): EpisodeRepository {
+    fun provideMyRepository1(api: MovieApi): EpisodeRepository {
         return EpisodeRepositoryImpl(api)
     }
 

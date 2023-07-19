@@ -4,7 +4,7 @@ package com.keeghan.movieinfo.models
 import com.google.gson.annotations.SerializedName
 
 data class MovieOverViewResponse(
-    val certificates: Certificates,
+    val certificates: Certificates?,
     val genres: List<String>,
     val id: String, // /title/tt0944947/
     val plotOutline: PlotOutline?,

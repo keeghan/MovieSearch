@@ -1,6 +1,7 @@
 plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
+    id 'org.jetbrains.kotlin.plugin.serialization'
     id 'dagger.hilt.android.plugin'
     id 'kotlin-kapt'
 }
@@ -89,14 +90,15 @@ dependencies {
     implementation("androidx.hilt:hilt-navigation-fragment:1.0.0")
     implementation("androidx.hilt:hilt-navigation-compose:1.0.0")
 
-    def paging_version = "3.2.0-beta01"
+    def paging_version = "3.2.0-rc01"
     implementation "androidx.paging:paging-runtime:$paging_version"
     implementation "androidx.paging:paging-compose:$paging_version"
 
     //GridPad
     implementation "com.touchlane:gridpad:0.0.4"
 
-
+    //Serialization
+    implementation 'org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.0'
 
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'

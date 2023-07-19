@@ -10,6 +10,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.rememberNavController
 import com.keeghan.movieinfo.navigation.RootNavGraph
+import com.keeghan.movieinfo.ui.screens.PgItemPreview
 import com.keeghan.movieinfo.ui.theme.MovieInfoTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -27,10 +28,10 @@ class MainActivity : ComponentActivity() {
                     RootNavGraph(navController = rememberNavController()) //Hello
                     // InfoScreen(navController = rememberNavController(), movieId = "tt0944947")
                     // InfoScreen(navController = rememberNavController(), movieId = "tt5861236")
-                    // PreviewScreen("tt0944947")
+                    //PreviewScreen(movieId = "tt0944947")
+                   // PgItemPreview()
                 }
             }
         }
     }
 }
-

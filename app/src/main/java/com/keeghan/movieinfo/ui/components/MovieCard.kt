@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -19,17 +20,25 @@ import com.keeghan.movieinfo.repository.paging.extractId
 import com.keeghan.movieinfo.ui.screens.SmallText
 import com.keeghan.movieinfo.utils.SmallSpaceH
 
-
+/**
+ * A composable that represents a movie search item
+ * @param movie is an object of type [Result] that
+ * models a show/Movie/Series received from the Api
+ * */
 @Composable
 fun MovieCard(
     movie: Result,
     onMovieClick: (String) -> Unit
 ) {
     Card(
-        modifier = Modifier
-            .width(150.dp)
+        modifier = Modifier.padding(bottom = 10.dp, top = 8.dp, start = 8.dp, end = 8.dp)
+            .width(100.dp)
             .height(270.dp)
-            .clickable { onMovieClick(extractId(movie.id)!!) }
+            .clickable { onMovieClick(extractId(movie.id)!!) },
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 4.dp,
+            pressedElevation = 2.dp
+        )
     ) {
         Column {
             CardImage(url = movie?.image?.url, title = movie.title)

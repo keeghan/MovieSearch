@@ -12,14 +12,14 @@ import androidx.compose.material.icons.outlined.Search
 import androidx.compose.ui.graphics.vector.ImageVector
 
 //Class Representing the BottomNavigation destinations
-sealed class BottomBarScreen(
+sealed class BottomBarDestination(
     val route: String,
     val title: String,
     val icon: ImageVector,
     val icon_focused: ImageVector,
 ) {
     //for recipe homepage
-    object Home : BottomBarScreen(
+    object Home : BottomBarDestination(
         route = "home",
         title = "home",
         icon = Icons.Outlined.Home,
@@ -27,7 +27,7 @@ sealed class BottomBarScreen(
     )
 
     //for recipe homepage
-    object Search : BottomBarScreen(
+    object Search : BottomBarDestination(
         route = "search",
         title = "search",
         icon = Icons.Outlined.Search,
@@ -35,7 +35,7 @@ sealed class BottomBarScreen(
     )
 
     //for plan homepage
-    object Video : BottomBarScreen(
+    object Video : BottomBarDestination(
         route = "video",
         title = "video",
         icon = Icons.Outlined.PlayArrow,
@@ -43,7 +43,7 @@ sealed class BottomBarScreen(
     )
 
     //for plan homepage
-    object Profile : BottomBarScreen(
+    object Profile : BottomBarDestination(
         route = "profile",
         title = "profile",
         icon = Icons.Outlined.Person,

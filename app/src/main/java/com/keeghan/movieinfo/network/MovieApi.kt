@@ -9,7 +9,8 @@ import retrofit2.Response
 import retrofit2.http.*
 
 
-interface IMDBApi {
+interface MovieApi {
+
 
     @GET("v2/find")
     suspend fun findTitle(
