@@ -10,7 +10,7 @@ data class MovieParentalGuideResponse(
 
 @Serializable
 data class ParentalGuide(
-    val items: List<Item>,
+    val items: List<Item>?,
     val label: String,
     val severityVotes: SeverityVotes
 ) {

@@ -16,8 +16,7 @@ import java.nio.charset.StandardCharsets
  * */
 fun NavGraphBuilder.movieInfoNavGraph(navController: NavController) {
     navigation(
-        route = Graph.MOVIE_INFO,
-        startDestination = Graph.MOVIE_INFO_SCREEN
+        route = Graph.MOVIE_INFO, startDestination = Graph.MOVIE_INFO_SCREEN
     ) {
         //Receive MovieId as String from [SearchScreen]
         composable(
@@ -26,7 +25,8 @@ fun NavGraphBuilder.movieInfoNavGraph(navController: NavController) {
         ) { //navigate to movie details page with movie Id
             InfoScreen(
                 navController, movieId = it.arguments?.getString("movieId")!!
-            ) { pgObjectString ->
+            ) { //encode string object of type MovieParentalGuideResponse before sending
+                    pgObjectString ->
                 val encodeObject = URLEncoder.encode(pgObjectString, StandardCharsets.UTF_8.toString())
                 navController.navigate("${Graph.CONTENT_ADVISORY}/$encodeObject")
             }

@@ -177,11 +177,11 @@ fun InfoScreen(
                         SpaceH(side = 20.dp)
                         if (moviePgScores?.parentalguide?.isNotEmpty() == true) {
                             //turn pgObject to string to pass as nav argument
-                            val pgString = Json.encodeToString(moviePgScores)
+                            val pgString = Json.encodeToString(moviePgScores)   //todo: Error
 
                             ParentsGuideSection(
                                 parentalGuides = moviePgScores!!.parentalguide
-                            ) { onContentAdvisoryClick( pgString) }   //pass parentalGuidance objectString upwards
+                            ) { onContentAdvisoryClick(pgString) }   //pass parentalGuidance objectString upwards
                         }
                     }
 
@@ -316,7 +316,7 @@ fun TitleText(text: String) {
 @Composable
 fun ImageSlider(
     images: List<MovieImagesResponse.Image>,
-    pagerState: PagerState = rememberPagerState(),
+    pagerState: PagerState = rememberPagerState(initialPage = 0, initialPageOffsetFraction = 0f, pageCount = images::size),
     autoScrollDuration: Long = 6000L
 ) {
     //create pagerState with auto scroll
@@ -347,7 +347,9 @@ fun ImageSlider(
             layout(placeable.width, placeable.height) {
                 placeable.place(0, 0)
             }
-        }, pageCount = images.size, state = pagerState
+        },
+      //  pageCount = images.size,
+        state = pagerState
     ) {
         val image = images[it]
         val isImageTooLarge = image.height > 2500 || image.width > 2500

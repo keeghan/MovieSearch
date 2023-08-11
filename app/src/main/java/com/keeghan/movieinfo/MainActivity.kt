@@ -11,12 +11,12 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.rememberNavController
 import com.keeghan.movieinfo.navigation.RootNavGraph
 import com.keeghan.movieinfo.ui.screens.PgItemPreview
+import com.keeghan.movieinfo.ui.screens.PreviewScreen
 import com.keeghan.movieinfo.ui.theme.MovieInfoTheme
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-    @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -25,10 +25,10 @@ class MainActivity : ComponentActivity() {
                 Surface(
                     modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background
                 ) {
-                    RootNavGraph(navController = rememberNavController()) //Hello
+                  //  RootNavGraph(navController = rememberNavController()) //Hello
                     // InfoScreen(navController = rememberNavController(), movieId = "tt0944947")
                     // InfoScreen(navController = rememberNavController(), movieId = "tt5861236")
-                    //PreviewScreen(movieId = "tt0944947")
+                    PreviewScreen(movieId = "tt0944947")
                    // PgItemPreview()
                 }
             }
