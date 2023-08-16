@@ -177,7 +177,7 @@ fun InfoScreen(
                         SpaceH(side = 20.dp)
                         if (moviePgScores?.parentalguide?.isNotEmpty() == true) {
                             //turn pgObject to string to pass as nav argument
-                            val pgString = Json.encodeToString(moviePgScores)   //todo: Error
+                            val pgString = Json.encodeToString(moviePgScores)
 
                             ParentsGuideSection(
                                 parentalGuides = moviePgScores!!.parentalguide
@@ -435,7 +435,7 @@ fun WatchListButton() {
     var isWatchListed by remember { mutableStateOf(false) }   //User feature not implemented
 
     AnimatedContent(
-        targetState = isWatchListed,
+        targetState = isWatchListed, label = "watchedAnimation",
         //transitionSpec = {}
     ) {
         val icon = if (it) Icons.Default.Check else Icons.Default.Add

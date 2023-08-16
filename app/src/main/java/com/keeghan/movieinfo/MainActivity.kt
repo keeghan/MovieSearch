@@ -25,10 +25,10 @@ class MainActivity : ComponentActivity() {
                 Surface(
                     modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background
                 ) {
-                  //  RootNavGraph(navController = rememberNavController()) //Hello
+                    RootNavGraph(navController = rememberNavController()) //Hello
                     // InfoScreen(navController = rememberNavController(), movieId = "tt0944947")
                     // InfoScreen(navController = rememberNavController(), movieId = "tt5861236")
-                    PreviewScreen(movieId = "tt0944947")
+                   // PreviewScreen(movieId = "tt0944947")
                    // PgItemPreview()
                 }
             }

@@ -50,6 +50,7 @@ class SearchViewModel @Inject constructor(
             )
         )
     )
+
     val movieSearchResult = _movieSearchResult as Flow<PagingData<Result>>
 
 
@@ -99,7 +100,7 @@ class SearchViewModel @Inject constructor(
         )
     }
 
-    /*Clear all filters*/
+    /*Clear all filters from search results*/
     private fun clearAllFilters() {
         _uiState.update {
             it.copy(
