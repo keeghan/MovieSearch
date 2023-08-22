@@ -77,7 +77,7 @@ fun MutableRatingStar() {
             }.using(
                 SizeTransform(clip = false)
             )
-        }) {
+        }, label = "") {
             Image(if (it) rated else unrated,
                 contentDescription = "rate",
                 modifier = Modifier

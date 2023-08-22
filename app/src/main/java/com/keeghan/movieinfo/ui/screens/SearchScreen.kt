@@ -28,7 +28,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -65,7 +64,6 @@ import kotlinx.coroutines.launch
 
 val genres = listOf("movie", "tvSeries", "videoGame", "short", "tvMovie", "tvEpisode", "tvMiniSeries")
 
-
 /**
  * A composable that represents the searchScreen
  * It receives a flow of Flow<PagingData<Result>> from
@@ -74,7 +72,7 @@ val genres = listOf("movie", "tvSeries", "videoGame", "short", "tvMovie", "tvEpi
  * [MovieCard] composable are clicked, their tiles are hoisted up to
  * @param onMovieClick which sends the Id's to the [InfoScreen] composable
  * */
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun SearchScreen(
     modifier: Modifier,
@@ -251,12 +249,21 @@ fun SearchScreen(
 
 
 @Composable
-fun SmallText(text: String?) {
+fun SmallPrimaryText(text: String?) {
     Text(
         text
             ?: "", color = MaterialTheme.colorScheme.primary, fontSize = 12.sp, modifier = Modifier.padding(end = 5.dp)
     )
 }
+
+@Composable
+fun SmallText(text: String?) {
+    Text(
+        text
+            ?: "", fontSize = 12.sp, modifier = Modifier.padding(end = 5.dp)
+    )
+}
+
 
 @Composable
 fun GenreFilterCard(genre: String, isClicked: Boolean, onClick: () -> Unit) {

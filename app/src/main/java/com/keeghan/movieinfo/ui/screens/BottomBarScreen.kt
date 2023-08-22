@@ -25,7 +25,6 @@ import com.keeghan.movieinfo.navigation.BottomBarDestination
 import com.keeghan.movieinfo.navigation.BottomNavGraph
 
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BottomBarScreen(
     navController: NavHostController = rememberNavController(),
