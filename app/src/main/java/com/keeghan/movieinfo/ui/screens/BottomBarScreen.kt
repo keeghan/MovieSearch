@@ -3,7 +3,6 @@ package com.keeghan.movieinfo.ui.screens
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
@@ -28,12 +27,14 @@ import com.keeghan.movieinfo.navigation.BottomNavGraph
 @Composable
 fun BottomBarScreen(
     navController: NavHostController = rememberNavController(),
-    onMovieCardClick: (String) -> Unit
+    onMovieCardClick: (String) -> Unit,
+    onSettingsClick: () -> Unit
 ) {
     Scaffold(bottomBar = { BottomBar(navController) }) {
-        BottomNavGraph(Modifier.padding(it), navController) { id ->
-            onMovieCardClick(id)
-        }
+        BottomNavGraph(Modifier.padding(it),
+            navController,
+            onMovieCardClick = { id -> onMovieCardClick(id) },
+            onSettingsClick = { onSettingsClick() })
     }
 }
 
@@ -55,9 +56,7 @@ fun BottomBar(navController: NavHostController) {
         ) {
             screens.forEach { screen ->
                 AddItem(
-                    screen = screen,
-                    currentDestination = currentDestination,
-                    navController = navController
+                    screen = screen, currentDestination = currentDestination, navController = navController
                 )
             }
         }
@@ -77,12 +76,11 @@ fun RowScope.AddItem(
         // modifier = Modifier.scale(0.5f),
         // label = { Text(text = screen.title) },
         icon = {
-            val icon =
-                if (currentDestination?.hierarchy?.any { it.route == screen.route } == true) {
-                    screen.icon_focused
-                } else {
-                    screen.icon
-                }
+            val icon = if (currentDestination?.hierarchy?.any { it.route == screen.route } == true) {
+                screen.icon_focused
+            } else {
+                screen.icon
+            }
             Icon(
                 imageVector = icon, contentDescription = "Navigation Icon"
             )
@@ -98,7 +96,6 @@ fun RowScope.AddItem(
                 popUpTo(navController.graph.findStartDestination().id)
                 launchSingleTop = true
             }
-        },
-        alwaysShowLabel = false
+        }, alwaysShowLabel = false
     )
 }

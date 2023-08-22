@@ -16,11 +16,11 @@ import java.nio.charset.StandardCharsets
  * */
 fun NavGraphBuilder.movieInfoNavGraph(navController: NavController) {
     navigation(
-        route = Graph.MOVIE_INFO, startDestination = Graph.MOVIE_INFO_SCREEN
+        route = MainGraph.MOVIE_INFO, startDestination = MainGraph.MOVIE_INFO_SCREEN
     ) {
         //Receive MovieId as String from [SearchScreen]
         composable(
-            route = "${Graph.MOVIE_INFO_SCREEN}/{movieId}",
+            route = "${MainGraph.MOVIE_INFO_SCREEN}/{movieId}",
             arguments = listOf(navArgument("movieId") { type = NavType.StringType })
         ) { //navigate to movie details page with movie Id
             InfoScreen(
@@ -28,13 +28,13 @@ fun NavGraphBuilder.movieInfoNavGraph(navController: NavController) {
             ) { //encode string object of type MovieParentalGuideResponse before sending
                     pgObjectString ->
                 val encodeObject = URLEncoder.encode(pgObjectString, StandardCharsets.UTF_8.toString())
-                navController.navigate("${Graph.CONTENT_ADVISORY}/$encodeObject")
+                navController.navigate("${MainGraph.CONTENT_ADVISORY}/$encodeObject")
             }
         }
 
         //Receive parentalGuidance as String
         composable(
-            route = "${Graph.CONTENT_ADVISORY}/{pgString}",
+            route = "${MainGraph.CONTENT_ADVISORY}/{pgString}",
             arguments = listOf(navArgument("pgString") { type = NavType.StringType })
         ) { //navigate to movie details page with movie Id
             ContentAdvisoryScreen(

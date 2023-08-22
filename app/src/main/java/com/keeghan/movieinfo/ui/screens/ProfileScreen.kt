@@ -35,6 +35,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.keeghan.movieinfo.ui.components.WatchListMovieCard
 import com.keeghan.movieinfo.ui.theme.seed
 import com.keeghan.movieinfo.utils.MoviePosters
@@ -45,11 +47,13 @@ val engagements = listOf("Ratings", "Lists", "Reviews")
 
 @Composable
 fun ProfileScreen(
+    navController: NavController = rememberNavController(),
     onSettingsClick: () -> Unit
 ) {
     Column(
         Modifier
-            .fillMaxSize().padding(bottom = 55.dp)
+            .fillMaxSize()
+            .padding(bottom = 55.dp)
             .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -83,13 +87,12 @@ fun ActionBar(
         Icon(Icons.Default.AccountCircle, "Profile", tint = seed)
         Text(text = "Mr. Man", modifier = Modifier.padding(start = 10.dp))
         Spacer(modifier = Modifier.weight(1f))
-        IconButton(onClick = { onSettingsClick() }) {
+        IconButton(onClick = { onSettingsClick() }) {//Send button click upwards to RootNav to Settings
             Icon(Icons.Default.Settings, "settings")
         }
     }
     SpaceH(10.dp)
 }
-
 
 
 @Composable
@@ -113,7 +116,8 @@ fun HomeCard(engagementType: String) {
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Text(text = insideText, textAlign = TextAlign.Center,
+                    Text(text = insideText,
+                        textAlign = TextAlign.Center,
                         modifier = Modifier
                             .padding(10.dp)
                             .clickable { }) //not Implemented }
@@ -125,6 +129,7 @@ fun HomeCard(engagementType: String) {
         }
     }
 }
+
 
 @Composable
 fun ProfileSection(
@@ -145,19 +150,15 @@ fun ProfileSection(
                 )
                 SpaceW(side = 7.dp)
                 Text(
-                    text = sectionName,
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.SemiBold
+                    text = sectionName, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold
                 )
             }
-            Text(text = "SEE ALL",
-                modifier = Modifier
-                    .padding(end = 10.dp)
-                    .clickable(
-                        interactionSource = remember { MutableInteractionSource() },
-                        indication = rememberRipple(color = MaterialTheme.colorScheme.primary)
-                    ) { }
-            )
+            Text(text = "SEE ALL", modifier = Modifier
+                .padding(end = 10.dp)
+                .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = rememberRipple(color = MaterialTheme.colorScheme.primary)
+                ) { })
         }
         SpaceH(side = 15.dp)
         Row(modifier = Modifier.horizontalScroll(rememberScrollState())) {
