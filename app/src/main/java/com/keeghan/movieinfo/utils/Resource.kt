@@ -1,10 +1,12 @@
 package com.keeghan.movieinfo.utils
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
@@ -31,31 +33,42 @@ enum class Status {
 }
 
 @Composable
-fun SmallSpaceH(){
+fun SmallSpaceH() {
     Spacer(modifier = Modifier.height(4.dp))
 }
 
 @Composable
-fun SmallSpaceW(){
+fun SmallSpaceW() {
     Spacer(modifier = Modifier.width(4.dp))
 }
 
 @Composable
-fun MediumHSpace(){
+fun MediumHSpace() {
     Spacer(modifier = Modifier.height(8.dp))
 }
 
 @Composable
-fun largeSpace(){
+fun largeSpace() {
     Spacer(modifier = Modifier.height(16.dp))
 }
 
 @Composable
-fun SpaceH(side:Dp){
+fun SpaceH(side: Dp) {
     Spacer(modifier = Modifier.height(side))
 }
 
 @Composable
-fun SpaceW(side:Dp){
+fun SpaceW(side: Dp) {
     Spacer(modifier = Modifier.width(side))
+}
+
+
+@Composable
+fun SpaceH(side: Dp, color: Color) {
+    Spacer(modifier = Modifier.height(side).background(color = color))
+}
+
+@Composable
+fun SpaceW(side: Dp, color: Color) {
+    Spacer(modifier = Modifier.width(side).background(color = color))
 }

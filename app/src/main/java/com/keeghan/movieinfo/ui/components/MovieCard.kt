@@ -51,7 +51,7 @@ fun MovieCard(
             CardImage(url = movie?.image?.url, title = movie.title)
             Column(
                 Modifier
-                    .padding(start = 4.dp, end = 4.dp)
+                    .padding(start = 4.dp, end = 4.dp, top = 2.dp)
                     .height(90.dp),
                 verticalArrangement = Arrangement.SpaceBetween
             ) {

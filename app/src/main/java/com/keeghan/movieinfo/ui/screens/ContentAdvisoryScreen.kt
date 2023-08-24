@@ -112,7 +112,7 @@ fun ContentAdvisoryCard(pgItem: ParentalGuide) {
     }
 
     Card(
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.onPrimary),
+
         modifier = Modifier.fillMaxWidth()
     ) {
         Text(

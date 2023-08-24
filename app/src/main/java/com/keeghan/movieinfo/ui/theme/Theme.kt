@@ -79,7 +79,7 @@ private val DarkColorScheme = darkColorScheme(
     surfaceTint = md_theme_dark_surfaceTint,
     outlineVariant = md_theme_dark_outlineVariant,
     scrim = md_theme_dark_scrim,
-)
+    )
 
 @Composable
 fun MovieInfoTheme(

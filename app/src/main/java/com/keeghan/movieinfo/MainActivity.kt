@@ -12,6 +12,7 @@ import androidx.navigation.compose.rememberNavController
 import com.keeghan.movieinfo.navigation.RootNavGraph
 import com.keeghan.movieinfo.ui.screens.PgItemPreview
 import com.keeghan.movieinfo.ui.screens.PreviewScreen
+import com.keeghan.movieinfo.ui.screens.SettingsScreen
 import com.keeghan.movieinfo.ui.theme.MovieInfoTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -25,7 +26,7 @@ class MainActivity : ComponentActivity() {
                 Surface(
                     modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background
                 ) {
-                    RootNavGraph(navController = rememberNavController()) //Hello
+                   RootNavGraph(navController = rememberNavController()) //Hello
                     // InfoScreen(navController = rememberNavController(), movieId = "tt0944947")
                     // InfoScreen(navController = rememberNavController(), movieId = "tt5861236")
                    // PreviewScreen(movieId = "tt0944947")

@@ -23,7 +23,7 @@ fun ScreenNotImplemented() {
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(text = "Sorry, only Search and You screens are implemented as of now",
+        Text(text = "Sorry, only Search and You screens are implemented as of now due to Api limitations",
             textAlign = TextAlign.Center)
     }
 }

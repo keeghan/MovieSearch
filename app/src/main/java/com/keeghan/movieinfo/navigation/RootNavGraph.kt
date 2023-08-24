@@ -14,19 +14,16 @@ fun RootNavGraph(
     navController: NavHostController,
 ) {
     NavHost(
-        navController = navController,
-        route = MainGraph.ROOT,
-        startDestination = MainGraph.BOTTOM_BAR_SCREEN
+        navController = navController, route = MainGraph.ROOT, startDestination = MainGraph.BOTTOM_BAR_SCREEN
     ) {
         //Handle navigation here to provide consistency of graph
         composable(route = MainGraph.BOTTOM_BAR_SCREEN) {
-            BottomBarScreen(
-                onMovieCardClick = { id -> navController.navigate("${MainGraph.MOVIE_INFO_SCREEN}/$id") },
-                onSettingsClick = { navController.navigate(SettingsGraph.SETTINGS) }
-            )
+            BottomBarScreen(onMovieCardClick = { id -> navController.navigate("${MainGraph.MOVIE_INFO_SCREEN}/$id") },
+                onSettingsClick = { navController.navigate(SettingsGraph.SETTINGS) })
         }
 
         movieInfoNavGraph(navController)
+
         settingsNavGraph(navController)
     }
 }
@@ -43,4 +40,13 @@ object MainGraph {
 object SettingsGraph {
     const val SETTINGS = "settings"
     const val SETTINGS_SCREEN = "settings_screen"
+
+    const val SETTINGS_ACCOUNT_SCREEN = "settings_account_screen"
+    const val SETTINGS_DISPLAY_SCREEN = "settings_display_screen"
+    const val SETTINGS_VIDEO_SCREEN = "settings_video_screen"
+    const val SETTINGS_PREFERENCES_SCREEN = "settings_preferences_screen"
+    const val SETTINGS_NOTIFICATION_SCREEN = "settings_notification_screen"
+    const val SETTINGS_STORAGE_SCREEN = "settings_storage_screen"
+    const val SETTINGS_ABOUT_SCREEN = "settings_about_screen"
+
 }
