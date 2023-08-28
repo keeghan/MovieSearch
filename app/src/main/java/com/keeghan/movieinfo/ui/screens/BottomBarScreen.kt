@@ -13,6 +13,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hierarchy
@@ -49,9 +50,11 @@ fun BottomBar(navController: NavHostController) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
 
+    //Check to see if you are currently on one of the four main bottom bar screens before showing bar
     val bottomBarDestination = screens.any { it.route == currentDestination?.route }
     if (bottomBarDestination) {
         NavigationBar(
+            containerColor = MaterialTheme.colorScheme.background,
             modifier = Modifier.height(55.dp)  //Remove to restore default size
         ) {
             screens.forEach { screen ->

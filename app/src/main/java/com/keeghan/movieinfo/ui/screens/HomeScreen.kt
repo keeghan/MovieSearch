@@ -7,8 +7,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.keeghan.movieinfo.R
 import com.keeghan.movieinfo.viewModel.SearchViewModel
 
 @Composable
@@ -23,7 +25,7 @@ fun ScreenNotImplemented() {
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(text = "Sorry, only Search and You screens are implemented as of now due to Api limitations",
+        Text(text = stringResource(R.string.api_limit_str),
             textAlign = TextAlign.Center)
     }
 }

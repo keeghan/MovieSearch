@@ -42,6 +42,7 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
@@ -52,13 +53,15 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
+import com.keeghan.movieinfo.R
 import com.keeghan.movieinfo.ui.components.MovieCard
 import com.keeghan.movieinfo.utils.SpaceH
 import com.keeghan.movieinfo.utils.SpaceW
 import com.keeghan.movieinfo.viewModel.SearchViewModel
 import kotlinx.coroutines.launch
 
-val genres = listOf("movie", "tvSeries", "videoGame", "short", "tvMovie", "tvEpisode", "tvMiniSeries")
+val genres =
+    listOf("movie", "tvSeries", "videoGame", "short", "tvMovie", "tvEpisode", "tvMiniSeries")
 
 /**
  * A composable that represents the searchScreen
@@ -103,14 +106,17 @@ fun SearchScreen(
         SpaceH(side = 5.dp)
         OutlinedTextField(
             value = titleState, onValueChange = { titleState = it },
-            placeholder = { Text("movie name") },
-            label = { Text(text = "Search", style = MaterialTheme.typography.bodyMedium) },
+            placeholder = { Text(stringResource(R.string.movie_name)) },
+            label = { Text(text = stringResource(R.string.search), style = MaterialTheme.typography.bodyMedium) },
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Email,
                 imeAction = ImeAction.Search
             ),
             leadingIcon = {
-                Icon(Icons.Default.Search, contentDescription = "search movie name")
+                Icon(
+                    Icons.Default.Search,
+                    contentDescription = stringResource(R.string.search_movie_name)
+                )
             },
             singleLine = true,
             textStyle = MaterialTheme.typography.bodyMedium,
@@ -121,7 +127,7 @@ fun SearchScreen(
                     keyboardController?.hide()
                     scope.launch { lazyVerticalGridState.scrollToItem(index = 0) }
                 } else {
-                    Toast.makeText(context, "empty searchBar", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, R.string.empty_searchbar, Toast.LENGTH_SHORT).show()
                 }
             }),
             modifier = Modifier
@@ -133,7 +139,11 @@ fun SearchScreen(
         //check if loading successful
         //Filter Cards(buttons) with different filters , default filter state = false
         if (movieResponse.itemCount > 0) {
-            Row(modifier = Modifier.horizontalScroll(rememberScrollState()).padding(start = 10.dp, end = 10.dp)) {
+            Row(
+                modifier = Modifier
+                    .horizontalScroll(rememberScrollState())
+                    .padding(start = 10.dp, end = 10.dp)
+            ) {
                 val filter = uiState.value.filters
 
                 genres.forEach { genre ->
@@ -188,8 +198,8 @@ fun SearchScreen(
                     when (val state = movieResponse.loadState.append) {
                         is LoadState.Error -> {
                             val msg = when (state.error.message) {
-                                null -> "error"
-                                "no matches" -> "no matches"  //todo fix recurring errors
+                                null -> stringResource(R.string.error)
+                                "no matches" -> stringResource(R.string.no_matches)  //todo fix recurring errors
                                 else -> state.error.message
                             }
                             Toast.makeText(LocalContext.current, msg, Toast.LENGTH_SHORT).show()
@@ -238,7 +248,10 @@ fun SearchScreen(
 fun SmallPrimaryText(text: String?) {
     Text(
         text
-            ?: "", color = MaterialTheme.colorScheme.primary, fontSize = 12.sp, modifier = Modifier.padding(end = 5.dp)
+            ?: "",
+        color = MaterialTheme.colorScheme.primary,
+        fontSize = 12.sp,
+        modifier = Modifier.padding(end = 5.dp)
     )
 }
 
@@ -256,7 +269,10 @@ fun GenreFilterCard(genre: String, isClicked: Boolean, onClick: () -> Unit) {
     Row(
         verticalAlignment = Alignment.CenterVertically, modifier = Modifier
             .padding(end = 10.dp)
-            .border(BorderStroke(1.dp, MaterialTheme.colorScheme.primary), shape = RoundedCornerShape(5.dp))
+            .border(
+                BorderStroke(1.dp, MaterialTheme.colorScheme.primary),
+                shape = RoundedCornerShape(5.dp)
+            )
             .padding(start = 5.dp, end = 5.dp, top = 6.dp, bottom = 6.dp)
     ) {
         Text(text = genre, modifier = Modifier
@@ -265,7 +281,7 @@ fun GenreFilterCard(genre: String, isClicked: Boolean, onClick: () -> Unit) {
             }
             .height(intrinsicSize = IntrinsicSize.Min))
         AnimatedVisibility(visible = isClicked) {
-            Icon(Icons.Default.Check, contentDescription = "filter selected")
+            Icon(Icons.Default.Check, contentDescription = stringResource(R.string.filter_selected))
         }
     }
     SpaceW(side = 5.dp)

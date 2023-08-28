@@ -62,8 +62,8 @@ fun MovieCard(
                         movie.title,
                         maxLines = 2,
                         overflow = TextOverflow.Ellipsis,
-                        lineHeight = 13.sp,
-                        style = MaterialTheme.typography.bodyLarge
+                        lineHeight = 15.sp,
+                        style = MaterialTheme.typography.bodyMedium
                     )
                 }
                 Spacer(modifier = Modifier.weight(1f))

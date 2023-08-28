@@ -37,12 +37,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color.Companion.Green
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.keeghan.movieinfo.R
 import com.keeghan.movieinfo.models.MovieParentalGuideResponse
 import com.keeghan.movieinfo.models.ParentalGuide
 import com.keeghan.movieinfo.utils.SpaceH
@@ -101,11 +103,11 @@ fun ContentAdvisoryCard(pgItem: ParentalGuide) {
         }
     }
     val label: String = when (pgItem.label) {
-        "nudity" -> "Sex and nudity"
-        "violence" -> "Violence and gore"
-        "profanity" -> "Profanity"
-        "alcohol" -> "Alcohol, drugs and smoking"
-        "frightening" -> "Frightening and intense scenes"
+        "nudity" ->  stringResource(R.string.sex_and_nudity)
+        "violence" -> stringResource(R.string.violence_and_gore)
+        "profanity" -> stringResource(R.string.profanity)
+        "alcohol" -> stringResource(R.string.alcohol_drugs_and_smoking)
+        "frightening" -> stringResource(R.string.frightening_scenes)
         else -> {
             " "
         }
@@ -137,7 +139,7 @@ fun ContentAdvisoryCard(pgItem: ParentalGuide) {
                         ) else it.toString()
                     },
                 )
-                Text(text = "Based on $totalVotes user votes")
+                Text(text = stringResource(R.string.based_on_user_votes, totalVotes))
             }
         }
         SpaceH(8.dp)
@@ -148,7 +150,7 @@ fun ContentAdvisoryCard(pgItem: ParentalGuide) {
             Divider(
                 thickness = Dp.Hairline, color = Color.Gray,
             )
-            AnimatedContent(targetState = isTextSpoiler, label = "spoiler_animation") {
+            AnimatedContent(targetState = isTextSpoiler, label = stringResource(R.string.spoiler_animation)) {
                 Row(
                     Modifier
                         .fillMaxWidth()
@@ -157,11 +159,11 @@ fun ContentAdvisoryCard(pgItem: ParentalGuide) {
                 ) {
                     if (it) {
                         Text(
-                            text = "WARNING: SPOILERS", style = MaterialTheme.typography.labelSmall,
+                            text = stringResource(R.string.spoiler_warnings), style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.error,
                             modifier = Modifier.weight(0.80f)
                         )
-                        Icon(Icons.Default.ArrowDropDown, contentDescription = "show spoiler",
+                        Icon(Icons.Default.ArrowDropDown, contentDescription = stringResource(R.string.show_spoiler),
                             modifier = Modifier
                                 .padding(end = 10.dp)
                                 .clickable { isTextSpoiler = false }
@@ -175,7 +177,7 @@ fun ContentAdvisoryCard(pgItem: ParentalGuide) {
                             style = MaterialTheme.typography.labelLarge,
                         )
                         IconButton(onClick = { /*TODO: menu item clicked*/ }) {
-                            Icon(Icons.Default.MoreVert, contentDescription = "more")
+                            Icon(Icons.Default.MoreVert, contentDescription = stringResource(R.string.more))
                         }
                     }
                 }
@@ -185,7 +187,7 @@ fun ContentAdvisoryCard(pgItem: ParentalGuide) {
             thickness = Dp.Hairline, color = Color.Gray,
         )
         Text(
-            text = "What is your vote for $label?",
+            text = stringResource(R.string.user_votes, label),
             style = MaterialTheme.typography.labelMedium,
             modifier = Modifier.padding(start = 10.dp, top = 10.dp)
         )
@@ -231,7 +233,7 @@ fun ContentAdvisoryCard(pgItem: ParentalGuide) {
         SpaceH(4.dp)
         AnimatedVisibility(visible = isUserVoted) {//Animate When user Vote
             Text(
-                text = "Thanks for your Vote",
+                text = stringResource(R.string.vote_thanks),
                 style = MaterialTheme.typography.labelMedium,
                 modifier = Modifier.padding(start = 10.dp)
             )

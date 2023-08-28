@@ -16,7 +16,7 @@ import com.keeghan.movieinfo.ui.theme.seed
 @Composable
 fun StorageScreen() {
     Column(Modifier.padding(2.dp)) {
-        Text(text = "Account", color = seed)
+        Text(text = "Storage", color = seed)
         Card(shape = RectangleShape) {
             Column(Modifier.fillMaxWidth().padding(5.dp)) {
                 Text(text = "User ID")

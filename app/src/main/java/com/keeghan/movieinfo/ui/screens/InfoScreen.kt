@@ -68,6 +68,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -156,7 +157,7 @@ fun InfoScreen(
                 Spacer(modifier = Modifier.height(5.dp))
                 //Plot
                 PlotSection(
-                    movieOverView!!.title.image,
+                    movieOverView!!.title?.image,
                     movieOverView!!.genres,
                     plot = movieOverView?.plotOutline?.text
                 )
@@ -210,7 +211,7 @@ fun InfoScreen(
             }
 
             ApiCallState.ERROR -> {
-                val errorMessage = uiState.value.titleApiError.ifBlank { "unknown error" }
+                val errorMessage = uiState.value.titleApiError.ifBlank { stringResource(R.string.unknown_error) }
                 Toast.makeText(
                     LocalContext.current,
                     uiState.value.titleApiError,
@@ -223,7 +224,7 @@ fun InfoScreen(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Button(onClick = { viewModel.findOverView(movieId) }) {
-                        Text(text = "Reload")
+                        Text(text = stringResource(R.string.reload))
                     }
                 }
             }
@@ -244,11 +245,15 @@ fun InfoScreen(
  * */
 @Composable
 fun TitleScreen(overview: MovieOverViewResponse) {
-    val isTvSeries = overview.title.titleType == "tvSeries"
-    val isMovie = overview.title.titleType == "movie"
-    val text = overview.title.title
+    val isTvSeries = (overview.title?.titleType ?: "") == "tvSeries"
+    val isMovie = (overview.title?.titleType ?: "") == "movie"
+    val title = if (overview.title?.title == null) {
+        ""
+    } else {
+        overview.title.title
+    }
 
-    val textSize = when (text.length) {
+    val textSize = when (title.length) {
         in 0..10 -> MaterialTheme.typography.displayMedium
         in 11..20 -> MaterialTheme.typography.displaySmall
         else -> MaterialTheme.typography.titleLarge
@@ -258,26 +263,26 @@ fun TitleScreen(overview: MovieOverViewResponse) {
         Modifier.fillMaxWidth()
     ) {
         Text(
-            text = overview.title.title,
+            text = title,
             style = textSize
         )
         Row {//Texts
             Text(
-                text = overview.title.titleType,
+                text = (overview.title?.titleType ?: ""),
                 color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.padding(end = 10.dp)
             )
             //Display "start - End year" if series otherwise just date
             if (isTvSeries) {
-                val time = "${overview.title.seriesStartYear} - ${overview.title.seriesEndYear}"
+                val time = "${overview.title?.seriesStartYear} - ${overview.title?.seriesEndYear}"
                 TitleText(text = time)
             } else if (isMovie) {
-                TitleText(text = overview.title.year.toString())
+                TitleText(text = overview.title?.year.toString())
                 if (overview.certificates != null) {
                     TitleText(text = overview.certificates.uS[0].certificate)
                 }
             }
-            TitleText(text = timeToStr(overview.title.runningTimeInMinutes))
+            TitleText(text = timeToStr(overview.title?.runningTimeInMinutes ?: 0))
         }
 
         //Display "Episode Guide" only if input is from a tvseries
@@ -291,7 +296,7 @@ fun TitleScreen(overview: MovieOverViewResponse) {
                             indication = rememberRipple(color = MaterialTheme.colorScheme.primary)
                         ) {})
                 TitleText(
-                    text = overview.title.numberOfEpisodes.toString() + " episodes"
+                    text = overview.title?.numberOfEpisodes.toString() + " episodes"
                 )
             }
         }
@@ -316,7 +321,11 @@ fun TitleText(text: String) {
 @Composable
 fun ImageSlider(
     images: List<MovieImagesResponse.Image>,
-    pagerState: PagerState = rememberPagerState(initialPage = 0, initialPageOffsetFraction = 0f, pageCount = images::size),
+    pagerState: PagerState = rememberPagerState(
+        initialPage = 0,
+        initialPageOffsetFraction = 0f,
+        pageCount = images::size
+    ),
     autoScrollDuration: Long = 6000L
 ) {
     //create pagerState with auto scroll
@@ -348,7 +357,7 @@ fun ImageSlider(
                 placeable.place(0, 0)
             }
         },
-      //  pageCount = images.size,
+        //  pageCount = images.size,
         state = pagerState
     ) {
         val image = images[it]
@@ -357,13 +366,13 @@ fun ImageSlider(
             //do not render large images
             MovieImageProvider(
                 url = if (isImageTooLarge) "null" else image.url,
-                contentDescription = if (isImageTooLarge) "Image too large" else image.caption,
+                contentDescription = if (isImageTooLarge) stringResource(id = R.string.image_large) else image.caption,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(250.dp)
             )
-            Text(text = if (isImageTooLarge) "Image too large" else image.caption)
+            Text(text = if (isImageTooLarge) stringResource(id = R.string.image_large)  else image.caption)
         }
     }
 }
@@ -373,7 +382,7 @@ fun ImageSlider(
 private fun PlotSection(
     image: MovieOverViewResponse.Title.Image?,
     genres: List<String>?,
-    plot: String? = "No plot available"
+    plot: String? = stringResource(id = R.string.no_plot)
 ) {
     Column(
         Modifier
@@ -413,7 +422,7 @@ private fun PlotSection(
                     }
                 }
                 Spacer(modifier = Modifier.height(15.dp))
-                val n = plot ?: "No plot available"
+                val n = plot ?: stringResource(R.string.no_plot)
                 Text(
                     style = MaterialTheme.typography.bodyMedium,
                     text = limitToFirstSentence(n),
@@ -439,7 +448,7 @@ fun WatchListButton() {
         //transitionSpec = {}
     ) {
         val icon = if (it) Icons.Default.Check else Icons.Default.Add
-        val text = if (it) "Added to Watchlist" else "Add to Watchlist"
+        val text = if (it) stringResource(R.string.added_to_watchlist) else stringResource(R.string.add_to_watchlist)
         val borderSize = if (it) 1.dp else 0.dp
         val textColor = if (it) MaterialTheme.colorScheme.onBackground else Color.Black
 
@@ -458,7 +467,7 @@ fun WatchListButton() {
                     isWatchListed = !isWatchListed
                 }) { //Click action, animation trigger
                     Icon(
-                        imageVector = icon, contentDescription = "add to playlist", tint = textColor
+                        imageVector = icon, contentDescription = stringResource(R.string.add_to_playlist), tint = textColor
                     )
                 }
                 Column {
@@ -618,14 +627,14 @@ fun NotificationSection() {
         ) {
             Column(Modifier.weight(0.8f)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Default.Notifications, contentDescription = "notifications")
+                    Icon(Icons.Default.Notifications, contentDescription = stringResource(R.string.notifs))
                     Text(
-                        text = "Turn on notifications", style = MaterialTheme.typography.titleMedium
+                        text = stringResource(R.string.turn_on_notifs), style = MaterialTheme.typography.titleMedium
                     )
                 }
                 //  Spacer(Modifier.padding(bottom = 5.dp))
                 Text(
-                    text = "Get notified when items in your Watchlist become available",
+                    text = stringResource(R.string.get_notified),
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.padding(start = 5.dp)
                 )
@@ -665,12 +674,12 @@ fun ParentsGuideSection(
                 )
                 Spacer(modifier = Modifier.width(5.dp))
                 Text(
-                    text = "Parent's Guide",
+                    text = stringResource(R.string.parents_guide),
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold
                 )
             }
-            Text(text = "SEE ALL",
+            Text(text = stringResource(R.string.see_all),
                 modifier = Modifier
                     .padding(end = 10.dp)
                     .clickable(
@@ -687,9 +696,9 @@ fun ParentsGuideSection(
             .clickable {
                 onContentAdvisoryClick()
             }) {
-            Text(text = "Content Rating", modifier = Modifier.padding(bottom = 0.dp))
+            Text(text = stringResource(R.string.content_rating), modifier = Modifier.padding(bottom = 0.dp))
             Text(
-                text = "view content advisory",
+                text = stringResource(R.string.view_content_advisory),
                 style = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier
                     .alpha(0.7f)
@@ -710,11 +719,11 @@ fun ParentsGuideSection(
                     }
                 }
                 val label: String = when (guide.label) {
-                    "nudity" -> "Sex and nudity:  "
-                    "violence" -> "Violence and gore:  "
-                    "profanity" -> "Profanity:  "
-                    "alcohol" -> "Alcohol, drugs and smoking:  "
-                    "frightening" -> "Frightening and intense scenes:  "
+                    "nudity" -> stringResource(R.string.sex_and_nudity)
+                    "violence" -> stringResource(R.string.violence_and_gore)
+                    "profanity" -> stringResource(R.string.profanity)
+                    "alcohol" -> stringResource(R.string.alcohol_drugs_and_smoking)
+                    "frightening" -> stringResource(R.string.frightening_scenes)
                     else -> {
                         " "
                     }

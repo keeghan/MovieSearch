@@ -39,12 +39,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.keeghan.movieinfo.R
 import com.keeghan.movieinfo.ui.components.WatchListMovieCard
 import com.keeghan.movieinfo.ui.theme.seed
 import com.keeghan.movieinfo.utils.MoviePosters
@@ -70,15 +72,15 @@ fun ProfileScreen(
         ActionBar { onSettingsClick() }
         //Engagement Sections
         LazyRow(
-            contentPadding = PaddingValues(start = 15.dp, end = 15.dp),
+            contentPadding = PaddingValues(start = 10.dp, end = 15.dp),
             horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             items(engagements.size) { HomeCard(engagementType = engagements[it]) { displayNotEnabledToast(context) } }
         }
         SpaceH(20.dp)
-        ProfileSection("WatchList") { displayNotEnabledToast(context) }
+        ProfileSection(stringResource(R.string.watchlist)) { displayNotEnabledToast(context) }
         SpaceH(15.dp)
-        ProfileSection("Recently viewed") { displayNotEnabledToast(context) }
+        ProfileSection(stringResource(R.string.recently_viewed)) { displayNotEnabledToast(context) }
         SpaceH(15.dp)
 
         //Favorite People Section
@@ -88,9 +90,9 @@ fun ProfileScreen(
                     .fillMaxWidth()
                     .padding(start = 15.dp, end = 5.dp)
             ) {
-                TitleCard(sectionName = "Favorite People") { displayNotEnabledToast(context) }
+                TitleCard(sectionName = stringResource(R.string.favorite_people)) { displayNotEnabledToast(context) }
                 Text(
-                    text = "Add your favorite actors, directors, and more to stay up to date on their latest projects",
+                    text = stringResource(R.string.add_favorite_actors),
                     modifier = Modifier.padding(end = 5.dp, top = 5.dp),
                     lineHeight = 16.sp
                 )
@@ -101,20 +103,20 @@ fun ProfileScreen(
                         .fillMaxWidth()
                         .padding(end = 5.dp),
                     shape = RoundedCornerShape(5.dp)
-                ) { Text(text = "Add to favorite People", style = MaterialTheme.typography.bodyLarge) }
+                ) { Text(text = stringResource(R.string.add_to_favorite_people), style = MaterialTheme.typography.bodyLarge) }
                 SpaceH(20.dp)
             }
         }
         SpaceH(20.dp)
-        ProfileCard("Favourite Cinemas") { displayNotEnabledToast(context) }
-        ProfileCard("Check-Ins") { displayNotEnabledToast(context) }
-        ProfileCard("Notifications") { displayNotEnabledToast(context) }
+        ProfileCard(stringResource(R.string.favourite_cinemas)) { displayNotEnabledToast(context) }
+        ProfileCard(stringResource(R.string.check_ins)) { displayNotEnabledToast(context) }
+        ProfileCard(stringResource(R.string.notifs)) { displayNotEnabledToast(context) }
         SpaceH(5.dp)
     }
 }
 
 fun displayNotEnabledToast(context: Context) {
-    Toast.makeText(context, "Feature not Implemented", Toast.LENGTH_SHORT).show()
+    Toast.makeText(context, context.getString(R.string.feature_not_implemented), Toast.LENGTH_SHORT).show()
 }
 
 
@@ -128,11 +130,11 @@ fun ActionBar(
             .padding(start = 15.dp, end = 15.dp, top = 10.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(Icons.Default.AccountCircle, "Profile", tint = seed)
+        Icon(Icons.Default.AccountCircle, stringResource(R.string.profile), tint = seed)
         Text(text = "Mr. Man", modifier = Modifier.padding(start = 10.dp))
         Spacer(modifier = Modifier.weight(1f))
         IconButton(onClick = { onSettingsClick() }) {//Send button click upwards to RootNav to Settings
-            Icon(Icons.Default.Settings, "settings")
+            Icon(Icons.Default.Settings, stringResource(R.string.settings))
         }
     }
     SpaceH(10.dp)
@@ -144,9 +146,9 @@ fun HomeCard(
     onFeatureClick: () -> Unit
 ) {
     val insideText = when (engagementType) {
-        "Ratings" -> "Rate a show or a movie"
-        "Lists" -> "Create a list"
-        "Reviews" -> "No Reviews"
+        "Ratings" -> stringResource(R.string.rate_show)
+        "Lists" -> stringResource(R.string.create_list)
+        "Reviews" -> stringResource(R.string.no_reviews)
         else -> throw IllegalArgumentException()
     }
     Card(
@@ -245,7 +247,7 @@ fun TitleCard(
         Text(text = sectionName, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Normal)
         Spacer(modifier = Modifier.weight(1f))
         Text(
-            text = "SEE ALL", modifier = Modifier
+            text = stringResource(R.string.see_all), modifier = Modifier
                 .padding(end = 10.dp)
                 .clickable(
                     interactionSource = remember { MutableInteractionSource() },

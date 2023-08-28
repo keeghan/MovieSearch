@@ -5,13 +5,13 @@ import com.google.gson.annotations.SerializedName
 
 data class MovieOverViewResponse(
     val certificates: Certificates?,
-    val genres: List<String>,
+    val genres: List<String>?,
     val id: String, // /title/tt0944947/
     val plotOutline: PlotOutline?,
     val plotSummary: PlotSummary?,
     val ratings: Ratings?,
-    val releaseDate: String, // 2011-04-17
-    val title: Title
+    val releaseDate: String?, // 2011-04-17
+    val title: Title?
 ) {
     data class Certificates(
         @SerializedName("US")

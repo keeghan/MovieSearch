@@ -12,8 +12,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.keeghan.movieinfo.R
 import com.keeghan.movieinfo.utils.SpaceH
 
 @Composable
@@ -27,13 +29,13 @@ fun SettingsScreen(
     onAboutClick: () -> Unit,
 ) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        SettingsItem(label = "Account") { onAccountClick() }
-        SettingsItem(label = "Display") { onDisplayClick() }
-        SettingsItem(label = "Video") { onVideoClick() }
-        SettingsItem(label = "Watch preferences") { onPreferencesClick() }
-        SettingsItem(label = "Notifications") { onNotificationsClick() }
-        SettingsItem(label = "Storage") { onStorageClick() }
-        SettingsItem(label = "About") { onAboutClick() }
+        SettingsItem(label = stringResource(R.string.account)) { onAccountClick() }
+        SettingsItem(label = stringResource(R.string.display)) { onDisplayClick() }
+        SettingsItem(label = stringResource(R.string.video)) { onVideoClick() }
+        SettingsItem(label = stringResource(R.string.watch_preferences)) { onPreferencesClick() }
+        SettingsItem(label = stringResource(R.string.notifs)) { onNotificationsClick() }
+        SettingsItem(label = stringResource(R.string.storage)) { onStorageClick() }
+        SettingsItem(label = stringResource(R.string.about)) { onAboutClick() }
 
         SpaceH(20.dp)
 
@@ -41,7 +43,7 @@ fun SettingsScreen(
             onClick = { },
             shape = RectangleShape
         ) {
-            Text(text = "SIGN OUT")
+            Text(text = stringResource(R.string.sign_out))
         }
     }
 }
@@ -62,8 +64,7 @@ fun SettingsItem(
             Text(text = label, modifier = Modifier.padding(top = 2.dp, end = 2.dp))
         }
     }
-    if (label != "About") {
+    if (label != stringResource(R.string.about)) {
         Divider(thickness = Dp.Hairline)
-
     }
 }

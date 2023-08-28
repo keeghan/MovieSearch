@@ -12,11 +12,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.keeghan.movieinfo.ui.theme.seed
 
-@Preview
 @Composable
 fun AboutScreen() {
     Column(Modifier.padding(2.dp)) {
-        Text(text = "Account", color = seed)
+        Text(text = "About", color = seed)
         Card(shape = RectangleShape) {
             Column(Modifier.fillMaxWidth().padding(5.dp)) {
                 Text(text = "User ID")

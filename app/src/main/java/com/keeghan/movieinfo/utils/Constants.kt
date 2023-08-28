@@ -35,5 +35,34 @@ class Constants {
         const val DARK_THEME_KEY = "dark_theme_enabled"
 
 
+        object ThemeSettings {
+            const val DARK = 0
+            const val LIGHT = 1
+        }
+
+        object RegionSettings {
+            const val UK = 0
+            const val US = 1
+        }
+
+        object NetworkSettings{
+            const val WIFI_CELLULAR = 0
+            const val WIFI_ONLY = 1
+            const val NO_AUTO_PLAY = 2
+        }
+
+        object SubTitleOptions{
+            const val ALWAYS_ON = 0
+            const val ON_WHEN_MUTED = 1
+            const val OFF = 2
+        }
+
+        object StreamingOptions{
+            const val COM = 0
+            const val CO_UK = 1
+            const val DO = 2
+            const val IN = 3
+        }
+
     }
 }
