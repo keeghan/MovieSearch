@@ -8,6 +8,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.intl.Locale
+import androidx.compose.ui.text.toUpperCase
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.keeghan.movieinfo.ui.theme.seed
@@ -16,7 +18,8 @@ import com.keeghan.movieinfo.ui.theme.seed
 @Composable
 fun SettingsScreenTitle(label: String) {
     Text(
-        text = label, color = seed,
+        text = label.toUpperCase(Locale.current),
+        color = seed,
         style = MaterialTheme.typography.bodySmall,
         modifier = Modifier.padding(start = 15.dp, top = 10.dp, bottom = 10.dp)
     )

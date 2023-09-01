@@ -2,7 +2,7 @@
     <string name="app_name">MovieInfo</string>
     <string name="tips_sub">Learn how to get the most out of MovieInfo with helpful tool tips</string>
     <string name="tips">Tips</string>
-    <string name="help">HELP</string>
+    <string name="help">Help</string>
     <string name="language_sub">View the titles of shows and movies in their original language when available</string>
     <string name="title_option">Show titles in original language</string>
     <string name="region_settings_sub">View titles, ratings and release dates from this region when available</string>
@@ -83,4 +83,15 @@
     <string name="stay_up_to_date">Stay up to date on entertainment news</string>
     <string name="on_tonight">On Tonight</string>
     <string name="updates_watchlist_tonight">Updates you when a new episode from your Watchlist is available tonight</string>
+    <string name="delete_cache">Delete cache</string>
+    <string name="delete_cache_c">DELETE CACHE</string>
+    <string name="version">version</string>
+    <string name="legal">Legal</string>
+    <string name="feedback">FeedBack</string>
+    <string name="auto_play_video">Auto-play video</string>
+    <string name="auto_play_sub">Enable to automatically play video muted at the top of title and name pages</string>
+    <string name="captions_style">Captions style</string>
+    <string name="set_in_accessibility">Set in Accessibility</string>
+    <string name="subtitles_and_captions">Subtitles and captions</string>
+    <string name="watchlist_sub">Shows and movies available to watch from your watchlist</string>
 </resources>

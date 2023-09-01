@@ -78,9 +78,11 @@ fun ProfileScreen(
             items(engagements.size) { HomeCard(engagementType = engagements[it]) { displayNotEnabledToast(context) } }
         }
         SpaceH(20.dp)
-        ProfileSection(stringResource(R.string.watchlist)) { displayNotEnabledToast(context) }
+        ProfileSection(stringResource(R.string.watchlist),
+            stringResource(R.string.watchlist_sub)
+        ) { displayNotEnabledToast(context) }
         SpaceH(15.dp)
-        ProfileSection(stringResource(R.string.recently_viewed)) { displayNotEnabledToast(context) }
+        ProfileSection(stringResource(R.string.recently_viewed),"") { displayNotEnabledToast(context) }
         SpaceH(15.dp)
 
         //Favorite People Section
@@ -182,6 +184,7 @@ fun HomeCard(
 @Composable
 fun ProfileSection(
     sectionName: String,
+    sub:String,
     onFeatureClick: () -> Unit
 ) {
     Card(
@@ -190,6 +193,10 @@ fun ProfileSection(
     ) {
         Column(modifier = Modifier.padding(start = 15.dp)) {
             TitleCard(sectionName) { onFeatureClick() }
+            if (sub.isNotBlank()){
+                SpaceH(15.dp)
+                Text(text = sub,modifier = Modifier.padding(end = 35.dp))
+            }
             SpaceH(15.dp)
             Row(modifier = Modifier.horizontalScroll(rememberScrollState())) {
                 WatchListMovieCard(
@@ -253,7 +260,7 @@ fun TitleCard(
                     interactionSource = remember { MutableInteractionSource() },
                     indication = rememberRipple(color = MaterialTheme.colorScheme.primary),
                 ) { onFeatureClick() },
-            color = MaterialTheme.colorScheme.tertiary, style = MaterialTheme.typography.bodyMedium
+            color = MaterialTheme.colorScheme.secondary, style = MaterialTheme.typography.bodyMedium
         )
 
     }

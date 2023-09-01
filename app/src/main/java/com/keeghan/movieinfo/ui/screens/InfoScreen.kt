@@ -79,6 +79,7 @@ import com.keeghan.movieinfo.models.MovieImagesResponse
 import com.keeghan.movieinfo.models.MovieOverViewResponse
 import com.keeghan.movieinfo.models.ParentalGuide
 import com.keeghan.movieinfo.ui.components.rememberStarRate
+import com.keeghan.movieinfo.utils.Constants
 import com.keeghan.movieinfo.utils.MovieImageProvider
 import com.keeghan.movieinfo.utils.MutableRatingStar
 import com.keeghan.movieinfo.utils.SpaceH
@@ -125,7 +126,7 @@ fun InfoScreen(
         Modifier
             .verticalScroll(rememberScrollState())
             .fillMaxSize()
-            .padding(10.dp), horizontalAlignment = Alignment.CenterHorizontally
+            .padding(10.dp, bottom = Constants.BOTTOM_BAR_PADDING), horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
         //Use appropriate action on according to UiState

@@ -12,7 +12,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.keeghan.movieinfo.ui.theme.seed
 
-@Preview
 @Composable
 fun AccountScreen() {
     Column(Modifier.padding(2.dp)) {

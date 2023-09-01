@@ -50,7 +50,7 @@ fun WatchListMovieCard(
             defaultElevation = 10.dp,
             pressedElevation = 2.dp
         ),
-        colors = CardDefaults.cardColors(containerColor = cardSurfaceVariant)
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
     ) {
         Column {
             AsyncImage(

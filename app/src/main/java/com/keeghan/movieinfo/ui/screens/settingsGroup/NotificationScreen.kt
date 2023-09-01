@@ -2,37 +2,42 @@ package com.keeghan.movieinfo.ui.screens.settingsGroup
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Divider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import com.keeghan.movieinfo.R
 import com.keeghan.movieinfo.ui.components.SettingsScreenCard
+import com.keeghan.movieinfo.utils.Constants
 
-@Preview
 @Composable
 fun NotificationScreen() {
-    var isTipsOn by remember { mutableStateOf(false) }
-    var isTrailerOn by remember { mutableStateOf(false) }
-    var inTheaters by remember { mutableStateOf(false) }
-    var isRecommendationsOn by remember { mutableStateOf(false) }
-    var isNowStreamingOn by remember { mutableStateOf(false) }
-    var isTrendingOn by remember { mutableStateOf(false) }
-    var isNewsOn by remember { mutableStateOf(false) }
-    var isTonightOn by remember { mutableStateOf(false) }
+    var isTipsOn by rememberSaveable { mutableStateOf(false) }
+    var isTrailerOn by rememberSaveable { mutableStateOf(false) }
+    var inTheaters by rememberSaveable { mutableStateOf(false) }
+    var isRecommendationsOn by rememberSaveable { mutableStateOf(false) }
+    var isNowStreamingOn by rememberSaveable { mutableStateOf(false) }
+    var isTrendingOn by rememberSaveable { mutableStateOf(false) }
+    var isNewsOn by rememberSaveable { mutableStateOf(false) }
+    var isTonightOn by rememberSaveable { mutableStateOf(false) }
 
-    Column {
+    Column(
+        Modifier
+            .verticalScroll(rememberScrollState())
+            .padding(bottom = Constants.BOTTOM_BAR_PADDING)
+    ) {
 
         //Tips and Tricks
         SettingsScreenCard(
-            isToggle = true,
             toggleState = isTipsOn,
             title = stringResource(R.string.tips_and_tricks),
             subtitle = stringResource(R.string.get_most_out)
@@ -41,7 +46,6 @@ fun NotificationScreen() {
 
         //Trailers
         SettingsScreenCard(
-            isToggle = true,
             toggleState = isTrailerOn,
             title = stringResource(R.string.trailers),
             subtitle = stringResource(R.string.get_latest_trailers)
@@ -50,7 +54,6 @@ fun NotificationScreen() {
 
         //In Theaters
         SettingsScreenCard(
-            isToggle = true,
             toggleState = inTheaters,
             title = stringResource(R.string.in_theaters),
             subtitle = stringResource(R.string.get_updates)
@@ -59,7 +62,6 @@ fun NotificationScreen() {
 
         //Recommendations
         SettingsScreenCard(
-            isToggle = true,
             toggleState = isRecommendationsOn,
             title = stringResource(R.string.recommendations),
             subtitle = stringResource(R.string.personalized_recommendations)
@@ -68,7 +70,6 @@ fun NotificationScreen() {
 
         //Now Streaming
         SettingsScreenCard(
-            isToggle = true,
             toggleState = isNowStreamingOn,
             title = stringResource(R.string.now_streaming),
             subtitle = stringResource(R.string.updates__watchlist)
@@ -77,7 +78,6 @@ fun NotificationScreen() {
 
         //Trending Now
         SettingsScreenCard(
-            isToggle = true,
             toggleState = isTrendingOn,
             title = stringResource(R.string.trending_now),
             subtitle = stringResource(R.string.dive_in_to_trending)
@@ -86,7 +86,6 @@ fun NotificationScreen() {
 
         //News
         SettingsScreenCard(
-            isToggle = true,
             toggleState = isNewsOn,
             title = stringResource(R.string.news),
             subtitle = stringResource(R.string.stay_up_to_date)
@@ -95,7 +94,6 @@ fun NotificationScreen() {
 
         //On Tonight
         SettingsScreenCard(
-            isToggle = true,
             toggleState = isTonightOn,
             title = stringResource(R.string.on_tonight),
             subtitle = stringResource(R.string.updates_watchlist_tonight)

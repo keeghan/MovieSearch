@@ -16,7 +16,8 @@ import com.keeghan.movieinfo.ui.screens.VideoScreen
  * */
 @Composable
 fun BottomNavGraph(
-    modifier: Modifier, navController: NavHostController,
+    modifier: Modifier,
+    navController: NavHostController,
     onMovieCardClick: (String) -> Unit,
     onSettingsClick: () -> Unit
 ) {
@@ -39,6 +40,10 @@ fun BottomNavGraph(
         composable(route = BottomBarDestination.Profile.route) {
             ProfileScreen(navController) { onSettingsClick() }
         }
+
+        movieInfoNavGraph(navController)
+
+        settingsNavGraph(navController)
     }
 }
 

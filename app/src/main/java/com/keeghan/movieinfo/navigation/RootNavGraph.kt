@@ -16,15 +16,15 @@ fun RootNavGraph(
     NavHost(
         navController = navController, route = MainGraph.ROOT, startDestination = MainGraph.BOTTOM_BAR_SCREEN
     ) {
-        //Handle navigation here to provide consistency of graph
+        //Handle navigation here to provide consistency of graph  //deeper links handled in BottomBarScreen
         composable(route = MainGraph.BOTTOM_BAR_SCREEN) {
-            BottomBarScreen(onMovieCardClick = { id -> navController.navigate("${MainGraph.MOVIE_INFO_SCREEN}/$id") },
-                onSettingsClick = { navController.navigate(SettingsGraph.SETTINGS) })
+            BottomBarScreen()
+            //  BottomBarScreen(onMovieCardClick = { id -> navController.navigate("${MainGraph.MOVIE_INFO_SCREEN}/$id") },)
+            //  onSettingsClick = { navController.navigate(SettingsGraph.SETTINGS) })
         }
 
-        movieInfoNavGraph(navController)
-
-        settingsNavGraph(navController)
+        //   movieInfoNavGraph(navController)
+        //   settingsNavGraph(navController)
     }
 }
 
