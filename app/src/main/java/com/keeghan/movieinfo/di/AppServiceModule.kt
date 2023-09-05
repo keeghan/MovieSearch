@@ -1,5 +1,9 @@
 package com.keeghan.movieinfo.di
 
+import android.content.Context
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.preferencesDataStore
 import com.keeghan.movieinfo.network.MovieApi
 import com.keeghan.movieinfo.repository.EpisodeRepository
 import com.keeghan.movieinfo.repository.EpisodeRepositoryImpl
@@ -7,11 +11,12 @@ import com.keeghan.movieinfo.utils.Constants.BASE_URL
 import com.keeghan.movieinfo.utils.Constants.RETROFIT_CONNECT_TIMEOUT
 import com.keeghan.movieinfo.utils.Constants.RETROFIT_READ_TIMEOUT
 import com.keeghan.movieinfo.utils.Constants.RETROFIT_WRITE_TIMEOUT
-import com.keeghan.movieinfo.utils.Constants.apiKey3
-import com.keeghan.movieinfo.utils.Constants.host
+import com.keeghan.movieinfo.utils.Constants.APIKEY
+import com.keeghan.movieinfo.utils.Constants.HOST
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
@@ -22,6 +27,10 @@ import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
 import javax.inject.Named
 import javax.inject.Singleton
+
+val Context.settingsDataStore: DataStore<Preferences> by preferencesDataStore(
+    name = "settings"
+)
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -41,8 +50,8 @@ object AppServiceModule {
         //application intercept for RAPIDApi
         okHttpClient.addInterceptor { chain ->
             val request = chain.request().newBuilder()
-                .addHeader("X-RapidAPI-Key", apiKey3)
-                .addHeader("X-RapidAPI-Host", host)
+                .addHeader("X-RapidAPI-Key", APIKEY)
+                .addHeader("X-RapidAPI-Host", HOST)
                 .build()
             chain.proceed(request)
         }
@@ -66,6 +75,14 @@ object AppServiceModule {
     @Named("mainRepository")
     fun provideMyRepository1(api: MovieApi): EpisodeRepository {
         return EpisodeRepositoryImpl(api)
+    }
+
+    @Provides
+    @Singleton
+    fun provideSettingsDataStorePreferences(
+        @ApplicationContext context: Context
+    ): DataStore<Preferences> {
+        return context.settingsDataStore
     }
 
 
