@@ -23,7 +23,7 @@ import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -147,9 +147,7 @@ fun ContentAdvisoryCard(pgItem: ParentalGuide) {
         //null check on if item exits or not
         pgItem.items?.take(3)?.forEach { item ->
             var isTextSpoiler by remember { mutableStateOf(item.isSpoiler) }
-            Divider(
-                thickness = Dp.Hairline, color = Color.Gray,
-            )
+            HorizontalDivider(thickness = Dp.Hairline, color = Color.Gray)
             AnimatedContent(targetState = isTextSpoiler, label = stringResource(R.string.spoiler_animation)) {
                 Row(
                     Modifier
@@ -183,9 +181,7 @@ fun ContentAdvisoryCard(pgItem: ParentalGuide) {
                 }
             }
         } //End of Comments
-        Divider(
-            thickness = Dp.Hairline, color = Color.Gray,
-        )
+        HorizontalDivider(thickness = Dp.Hairline, color = Color.Gray)
         Text(
             text = stringResource(R.string.user_votes, label),
             style = MaterialTheme.typography.labelMedium,

@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
@@ -46,7 +47,7 @@ fun DisplayScreen(
     )
     //SettingsDropDownMenu.selectedOption uses int so convert dataStorePref.isDarkTheme to Int
     val isDarkTheme by remember {
-        derivedStateOf { if (dataStorePref.isDarkTheme) Constants.DARK_THEME else Constants.LIGHT_THEME }
+        derivedStateOf { if (dataStorePref.isDarkTheme) Constants.ThemeSettings.DARK_THEME else Constants.ThemeSettings.LIGHT_THEME }
     }
 
     val scope = rememberCoroutineScope()
@@ -78,7 +79,7 @@ fun DisplayScreen(
         //Localization
         SettingsScreenTitle(label = stringResource(R.string.localization))
         SettingsScreenCard(title = stringResource(R.string.app_language), subtitle = "") {}
-        Divider(Modifier.fillMaxWidth(), Dp.Hairline, color = Color.DarkGray)
+        HorizontalDivider(Modifier.fillMaxWidth(), Dp.Hairline, color = Color.DarkGray)
 
         SettingsScreenCard(
             title = stringResource(R.string.region),
@@ -107,7 +108,7 @@ fun DisplayScreen(
             title = stringResource(R.string.tips),
             subtitle = stringResource(R.string.tips_sub)
         ) { isTipsOn = !isTipsOn }
-        Divider(Modifier.fillMaxWidth(), Dp.Hairline, color = Color.DarkGray)
+        HorizontalDivider(Modifier.fillMaxWidth(), Dp.Hairline, color = Color.DarkGray)
     }
 }
 

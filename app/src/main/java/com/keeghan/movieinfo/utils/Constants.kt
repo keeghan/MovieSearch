@@ -23,8 +23,10 @@ object Constants {
     const val RETROFIT_CONNECT_TIMEOUT: Long = 11
 
 
-    const val DARK_THEME = 0
-    const val LIGHT_THEME = 1
+    object ThemeSettings{
+        const val DARK_THEME = 0
+        const val LIGHT_THEME = 1
+    }
 
     object RegionSettings {
         const val UK = 0
