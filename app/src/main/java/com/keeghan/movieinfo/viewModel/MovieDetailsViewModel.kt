@@ -100,16 +100,17 @@ class MovieDetailsViewModel @Inject constructor(
     fun getParentalGuidance(title: String) {
         val currentState = _uiState.value
 
-        val isAlreadyLoaded =
+        val isAlreadyLoadingOrLoaded =
             currentState.parentalGuideMovieId == title &&
-                    currentState.parentalGuide != null
+                    (currentState.parentalGuideState == ApiCallState.LOADING
+                    || currentState.parentalGuide != null)
 
-        if (isAlreadyLoaded) return
+        if (isAlreadyLoadingOrLoaded) return
 
         _uiState.update {
             it.copy(
                 parentalGuideState = ApiCallState.LOADING,
-                parentalGuideMovieId = null,
+                parentalGuideMovieId = title,
                 parentalGuide = null,
                 parentalGuideError = ""
             )

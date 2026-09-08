@@ -110,7 +110,7 @@ class SearchViewModel @Inject constructor(
     ).joinToString(",")
 
     private companion object {
-        const val SEARCH_DEBOUNCE_MILLIS = 400L
+        const val SEARCH_DEBOUNCE_MILLIS = 300L
     }
 
     private data class SearchRequest(
