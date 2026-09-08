@@ -90,8 +90,6 @@ import com.touchlane.gridpad.GridPadCellSize
 import com.touchlane.gridpad.GridPadCells
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
 
 /**
  * A composable that is used to display an the details of a show
@@ -105,7 +103,7 @@ fun InfoScreen(
     navController: NavController,
     movieId: String,
     viewModel: MovieDetailsViewModel = hiltViewModel(),
-    onContentAdvisoryClick: (String) -> Unit
+    onContentAdvisoryClick: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val movieOverView = uiState.overview
@@ -184,12 +182,9 @@ fun InfoScreen(
                         ApiCallState.SUCCESS -> {
                             SpaceH(side = 20.dp)
                             if (moviePgScores?.parentalguide?.isNotEmpty() == true) {
-                                //turn pgObject to string to pass as nav argument
-                                val pgString = Json.encodeToString(moviePgScores)
-
                                 ParentsGuideSection(
                                     parentalGuides = moviePgScores.parentalguide.orEmpty()
-                                ) { onContentAdvisoryClick(pgString) }   //pass parentalGuidance objectString upwards
+                                ) { onContentAdvisoryClick() }
                             }
                         }
 

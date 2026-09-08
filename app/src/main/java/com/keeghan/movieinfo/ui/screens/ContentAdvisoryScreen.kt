@@ -21,14 +21,18 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -42,46 +46,67 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.keeghan.movieinfo.R
-import com.keeghan.movieinfo.models.MovieParentalGuideResponse
 import com.keeghan.movieinfo.models.ParentalGuide
 import com.keeghan.movieinfo.utils.SpaceH
 import com.keeghan.movieinfo.utils.SpaceW
-import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
-import java.net.URLDecoder
-import java.nio.charset.StandardCharsets
+import com.keeghan.movieinfo.viewModel.ApiCallState
+import com.keeghan.movieinfo.viewModel.MovieDetailsViewModel
 import java.util.Locale
 
 
 /**
- *Composable that displays a list of examples of plot points
- * that may violate parental guidance
- * @param navController  passed from navigation graph to be used for navigation
- * @param pgString  [MovieParentalGuideResponse] object encoded to string
- * with kotlinx Serializer and URLEncoder
+ * Displays parental-guidance details loaded from a stable movie ID.
  * */
 @Composable
 fun ContentAdvisoryScreen(
-    navController: NavController,
-    pgString: String
+    movieId: String,
+    viewModel: MovieDetailsViewModel = hiltViewModel()
 ) {
-    //decode MovieParentalGuideResponse string passed from InfoScreen  back to object
-    val decodedObjectString = URLDecoder.decode(pgString, StandardCharsets.UTF_8.toString())
-    //Convert MovieParentalGuideResponse string passed from InfoScreen  back to object
-    val pg: MovieParentalGuideResponse = Json.decodeFromString(decodedObjectString)
+    val uiState by viewModel.uiState.collectAsState()
 
+    LaunchedEffect(movieId) {
+        viewModel.getParentalGuidance(movieId)
+    }
+
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        when (uiState.parentalGuideState) {
+            ApiCallState.LOADING, ApiCallState.IDLE -> CircularProgressIndicator()
+
+            ApiCallState.SUCCESS -> ContentAdvisoryList(
+                parentalGuides = uiState.parentalGuide?.parentalguide.orEmpty()
+            )
+
+            ApiCallState.ERROR -> Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    text = uiState.parentalGuideError.ifBlank {
+                        stringResource(R.string.unknown_error)
+                    }
+                )
+                SpaceH(8.dp)
+                Button(onClick = { viewModel.getParentalGuidance(movieId) }) {
+                    Text(stringResource(R.string.reload))
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ContentAdvisoryList(parentalGuides: List<ParentalGuide>) {
     Column(
-        Modifier
+        modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
     ) {
-        pg.parentalguide.orEmpty().forEach { pgItem ->
-            ContentAdvisoryCard(pgItem)
-        }
+        parentalGuides.forEach { ContentAdvisoryCard(it) }
     }
 }
 
@@ -334,9 +359,6 @@ fun PgItemPreview() {
     val l = listOf(
         pguideItem, pguideItem.copy(label = "violence"), pguideItem.copy(label = "alcohol")
     )
-    val pgResponse = MovieParentalGuideResponse(l)
-    val str = Json.encodeToString(pgResponse)
-
-    ContentAdvisoryScreen(rememberNavController(), str)
+    ContentAdvisoryList(l)
 }
 

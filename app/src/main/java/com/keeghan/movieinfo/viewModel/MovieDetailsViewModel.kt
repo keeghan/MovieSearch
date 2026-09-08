@@ -14,7 +14,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Named
-
+import kotlinx.coroutines.async
 
 @HiltViewModel
 class MovieDetailsViewModel @Inject constructor(
@@ -28,44 +28,48 @@ class MovieDetailsViewModel @Inject constructor(
     fun findOverView(title: String) {
         _uiState.update {
             it.copy(
-                overviewState = ApiCallState.LOADING,
-                overview = null,
-                images = null,
-                overviewError = ""
+                overviewState = ApiCallState.LOADING, overview = null, images = null, overviewError = ""
             )
         }
+
         viewModelScope.launch {
             try {
-                val response = repository.findOverView(title)
-                val imagesResponse = repository.getImages(title)
-                val overview = response.body()
+                // Both requests begin before either one is awaited.
+                val overviewRequest = async {
+                    repository.findOverView(title)
+                }
+
+                val imagesRequest = async {
+                    repository.getImages(title)
+                }
+
+                val overviewResponse = overviewRequest.await()
+                val imagesResponse = imagesRequest.await()
+
+                val overview = overviewResponse.body()
                 val images = imagesResponse.body()
-                if (response.isSuccessful && imagesResponse.isSuccessful && overview != null && images != null) {
+
+                if (overviewResponse.isSuccessful && imagesResponse.isSuccessful && overview != null && images != null) {
                     _uiState.update {
-                        it.copy(
-                            overviewState = ApiCallState.SUCCESS,
-                            overview = overview,
-                            images = images
-                        )
+                        it.copy(overviewState = ApiCallState.SUCCESS, overview = overview, images = images)
                     }
                 } else {
                     val message = when {
-                        !response.isSuccessful -> response.message()
+                        !overviewResponse.isSuccessful -> overviewResponse.message()
                         !imagesResponse.isSuccessful -> imagesResponse.message()
                         else -> "The server returned an empty response"
                     }
+
                     _uiState.update {
                         it.copy(
-                            overviewState = ApiCallState.ERROR,
-                            overviewError = message
+                            overviewState = ApiCallState.ERROR, overviewError = message
                         )
                     }
                 }
-            } catch (e: Exception) {
+            } catch (exception: Exception) {
                 _uiState.update {
                     it.copy(
-                        overviewState = ApiCallState.ERROR,
-                        overviewError = e.message ?: "Unknown error"
+                        overviewState = ApiCallState.ERROR, overviewError = exception.message ?: "Unknown error"
                     )
                 }
             }
@@ -78,9 +82,7 @@ class MovieDetailsViewModel @Inject constructor(
     fun getParentalGuidance(title: String) {
         _uiState.update {
             it.copy(
-                parentalGuideState = ApiCallState.LOADING,
-                parentalGuide = null,
-                parentalGuideError = ""
+                parentalGuideState = ApiCallState.LOADING, parentalGuide = null, parentalGuideError = ""
             )
         }
         viewModelScope.launch {
@@ -90,8 +92,7 @@ class MovieDetailsViewModel @Inject constructor(
                 if (response.isSuccessful && parentalGuide != null) {
                     _uiState.update {
                         it.copy(
-                            parentalGuideState = ApiCallState.SUCCESS,
-                            parentalGuide = parentalGuide
+                            parentalGuideState = ApiCallState.SUCCESS, parentalGuide = parentalGuide
                         )
                     }
                 } else {
@@ -102,16 +103,14 @@ class MovieDetailsViewModel @Inject constructor(
                     }
                     _uiState.update {
                         it.copy(
-                            parentalGuideState = ApiCallState.ERROR,
-                            parentalGuideError = message
+                            parentalGuideState = ApiCallState.ERROR, parentalGuideError = message
                         )
                     }
                 }
             } catch (e: Exception) {
                 _uiState.update {
                     it.copy(
-                        parentalGuideState = ApiCallState.ERROR,
-                        parentalGuideError = e.message ?: "Unknown error"
+                        parentalGuideState = ApiCallState.ERROR, parentalGuideError = e.message ?: "Unknown error"
                     )
                 }
             }
