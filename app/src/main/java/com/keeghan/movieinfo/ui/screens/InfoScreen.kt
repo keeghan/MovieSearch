@@ -116,7 +116,8 @@ fun InfoScreen(
     }
 
     //Make Api calls when composable is launched
-    LaunchedEffect(Unit) {
+    //id passed may cause viewmodel not reload (useful for back navigation)
+    LaunchedEffect(movieId) {
         viewModel.findOverView(movieId)
         viewModel.getParentalGuidance(movieId)
     }

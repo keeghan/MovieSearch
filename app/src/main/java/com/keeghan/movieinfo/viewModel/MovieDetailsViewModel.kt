@@ -26,9 +26,22 @@ class MovieDetailsViewModel @Inject constructor(
 
     //Get overview and movie images
     fun findOverView(title: String) {
+        val currentState = _uiState.value
+
+        val isAlreadyLoaded =
+            currentState.overviewMovieId == title &&
+                    currentState.overview != null &&
+                    currentState.images != null
+
+        if (isAlreadyLoaded) return
+
         _uiState.update {
             it.copy(
-                overviewState = ApiCallState.LOADING, overview = null, images = null, overviewError = ""
+                overviewState = ApiCallState.LOADING,
+                overviewMovieId = null,
+                overview = null,
+                images = null,
+                overviewError = ""
             )
         }
 
@@ -51,7 +64,12 @@ class MovieDetailsViewModel @Inject constructor(
 
                 if (overviewResponse.isSuccessful && imagesResponse.isSuccessful && overview != null && images != null) {
                     _uiState.update {
-                        it.copy(overviewState = ApiCallState.SUCCESS, overview = overview, images = images)
+                        it.copy(
+                            overviewState = ApiCallState.SUCCESS,
+                            overviewMovieId = title,
+                            overview = overview,
+                            images = images
+                        )
                     }
                 } else {
                     val message = when {
@@ -80,9 +98,20 @@ class MovieDetailsViewModel @Inject constructor(
     * Get parental guidance
     * */
     fun getParentalGuidance(title: String) {
+        val currentState = _uiState.value
+
+        val isAlreadyLoaded =
+            currentState.parentalGuideMovieId == title &&
+                    currentState.parentalGuide != null
+
+        if (isAlreadyLoaded) return
+
         _uiState.update {
             it.copy(
-                parentalGuideState = ApiCallState.LOADING, parentalGuide = null, parentalGuideError = ""
+                parentalGuideState = ApiCallState.LOADING,
+                parentalGuideMovieId = null,
+                parentalGuide = null,
+                parentalGuideError = ""
             )
         }
         viewModelScope.launch {
@@ -92,7 +121,9 @@ class MovieDetailsViewModel @Inject constructor(
                 if (response.isSuccessful && parentalGuide != null) {
                     _uiState.update {
                         it.copy(
-                            parentalGuideState = ApiCallState.SUCCESS, parentalGuide = parentalGuide
+                            parentalGuideState = ApiCallState.SUCCESS,
+                            parentalGuideMovieId = title,
+                            parentalGuide = parentalGuide
                         )
                     }
                 } else {
@@ -123,6 +154,8 @@ class MovieDetailsViewModel @Inject constructor(
 data class MovieDetailsUiState(
     val overviewState: ApiCallState = ApiCallState.IDLE,
     val parentalGuideState: ApiCallState = ApiCallState.IDLE,
+    val overviewMovieId: String? = null,
+    val parentalGuideMovieId: String? = null,
     val overview: MovieOverViewResponse? = null,
     val images: MovieImagesResponse? = null,
     val parentalGuide: MovieParentalGuideResponse? = null,
