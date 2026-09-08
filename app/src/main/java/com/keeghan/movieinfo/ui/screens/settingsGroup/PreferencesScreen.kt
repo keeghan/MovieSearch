@@ -17,6 +17,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.keeghan.movieinfo.R
 import com.keeghan.movieinfo.ui.components.SettingsDropDownMenu
@@ -36,20 +37,26 @@ fun PreferencesScreen() {
         var streamRegion by rememberSaveable { mutableIntStateOf(Constants.StreamingOptions.COM) }
 
         //IN THEATERS
-        SettingsScreenTitle(label = "IN THEATERS ")
+        SettingsScreenTitle(label = stringResource(R.string.in_theaters_heading))
 
         //LOCATION SETTINGS
         Card(shape = RectangleShape) {
             Row(Modifier.padding(start = 15.dp, top = 15.dp, bottom = 15.dp, end = 25.dp)) {
-                Text(text = "Location Settings")
+                Text(text = stringResource(R.string.location_settings))
                 Spacer(modifier = Modifier.weight(1f))
-                Icon(painterResource(id = R.drawable.my_location_24), "location icon")
+                Icon(
+                    painterResource(id = R.drawable.my_location_24),
+                    stringResource(R.string.location_icon)
+                )
             }
         }
 
         //BUY
-        SettingsScreenTitle(label = "BUY")
-        SettingsScreenCard(title = "Amazon Store", subtitle = "Select a location for online purchase options") {}
+        SettingsScreenTitle(label = stringResource(R.string.buy_heading))
+        SettingsScreenCard(
+            title = stringResource(R.string.amazon_store),
+            subtitle = stringResource(R.string.amazon_store_description)
+        ) {}
 
         SettingsDropDownMenu(
             options = streamingRegions,
@@ -65,12 +72,12 @@ fun PreferencesScreen() {
         )
 
         //STREAMING
-        SettingsScreenTitle(label = "STREAMING")
+        SettingsScreenTitle(label = stringResource(R.string.streaming_heading))
         Card(shape = RectangleShape) {
             Row(Modifier.padding(start = 15.dp, top = 12.dp, bottom = 12.dp, end = 10.dp)) {
-                Text(text = "Location Settings")
+                Text(text = stringResource(R.string.location_settings))
                 Spacer(modifier = Modifier.weight(1f))
-                Text(text = "0")
+                Text(text = stringResource(R.string.zero_count))
             }
         }
     }

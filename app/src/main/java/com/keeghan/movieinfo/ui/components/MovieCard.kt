@@ -14,6 +14,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -26,6 +27,7 @@ import com.keeghan.movieinfo.models.shows.Result
 import com.keeghan.movieinfo.repository.paging.extractId
 import com.keeghan.movieinfo.ui.screens.SmallPrimaryText
 import com.keeghan.movieinfo.utils.SmallSpaceH
+import com.keeghan.movieinfo.R
 
 /**
  * A composable that represents a movie search item
@@ -37,7 +39,18 @@ fun MovieCard(
     movie: Result,
     onMovieClick: (String) -> Unit
 ) {
-    val title = movie.title ?: "_"
+    val title = movie.title?.takeIf { it.isNotBlank() }
+        ?: stringResource(R.string.untitled)
+    val titleType = when (movie.titleType) {
+        "movie" -> stringResource(R.string.type_movie)
+        "tvSeries" -> stringResource(R.string.type_tv_series)
+        "videoGame" -> stringResource(R.string.type_video_game)
+        "short" -> stringResource(R.string.type_short)
+        "tvMovie" -> stringResource(R.string.type_tv_movie)
+        "tvEpisode" -> stringResource(R.string.type_tv_episode)
+        "tvMiniSeries" -> stringResource(R.string.type_tv_miniseries)
+        else -> movie.titleType?.takeIf { it.isNotBlank() }
+    }
     Card(
         modifier = Modifier
             .width(100.dp)
@@ -56,7 +69,9 @@ fun MovieCard(
                     .height(90.dp),
                 verticalArrangement = Arrangement.SpaceBetween
             ) {
-                SmallPrimaryText(text = movie.titleType ?: "_")
+                titleType?.let {
+                    SmallPrimaryText(text = it)
+                }
                 Spacer(modifier = Modifier.weight(1f))
                 Box {
                     Text(
@@ -68,9 +83,8 @@ fun MovieCard(
                     )
                 }
                 Spacer(modifier = Modifier.weight(1f))
-                Row {
-                    SmallPrimaryText(text = movie.year?.toString() ?: "_")
-                    SmallPrimaryText(text = movie.year?.toString() ?: "_")
+                movie.year?.let {
+                    SmallPrimaryText(text = it.toString())
                 }
                 SmallSpaceH()
             }

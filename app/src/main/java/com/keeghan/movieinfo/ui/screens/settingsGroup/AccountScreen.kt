@@ -9,17 +9,19 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.keeghan.movieinfo.ui.theme.seed
+import com.keeghan.movieinfo.R
 
 @Composable
 fun AccountScreen() {
     Column(Modifier.padding(2.dp)) {
-        Text(text = "Account", color = seed)
+        Text(text = stringResource(R.string.account), color = seed)
         Card(shape = RectangleShape) {
             Column(Modifier.fillMaxWidth().padding(5.dp)) {
-                Text(text = "User ID")
-                Text(text = "mr_man-05168")
+                Text(text = stringResource(R.string.user_id))
+                Text(text = stringResource(R.string.user_id_value))
             }
         }
     }

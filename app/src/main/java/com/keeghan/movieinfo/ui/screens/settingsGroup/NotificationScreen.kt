@@ -5,7 +5,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -42,7 +42,7 @@ fun NotificationScreen() {
             title = stringResource(R.string.tips_and_tricks),
             subtitle = stringResource(R.string.get_most_out)
         ) { isTipsOn = !isTipsOn }
-        Divider(Modifier.fillMaxWidth(), Dp.Hairline, color = Color.DarkGray)
+        HorizontalDivider(Modifier.fillMaxWidth(), Dp.Hairline, color = Color.DarkGray)
 
         //Trailers
         SettingsScreenCard(
@@ -50,7 +50,7 @@ fun NotificationScreen() {
             title = stringResource(R.string.trailers),
             subtitle = stringResource(R.string.get_latest_trailers)
         ) { isTrailerOn = !isTrailerOn }
-        Divider(Modifier.fillMaxWidth(), Dp.Hairline, color = Color.DarkGray)
+        HorizontalDivider(Modifier.fillMaxWidth(), Dp.Hairline, color = Color.DarkGray)
 
         //In Theaters
         SettingsScreenCard(
@@ -58,7 +58,7 @@ fun NotificationScreen() {
             title = stringResource(R.string.in_theaters),
             subtitle = stringResource(R.string.get_updates)
         ) { inTheaters = !inTheaters }
-        Divider(Modifier.fillMaxWidth(), Dp.Hairline, color = Color.DarkGray)
+        HorizontalDivider(Modifier.fillMaxWidth(), Dp.Hairline, color = Color.DarkGray)
 
         //Recommendations
         SettingsScreenCard(
@@ -66,7 +66,7 @@ fun NotificationScreen() {
             title = stringResource(R.string.recommendations),
             subtitle = stringResource(R.string.personalized_recommendations)
         ) { isRecommendationsOn = !isRecommendationsOn }
-        Divider(Modifier.fillMaxWidth(), Dp.Hairline, color = Color.DarkGray)
+        HorizontalDivider(Modifier.fillMaxWidth(), Dp.Hairline, color = Color.DarkGray)
 
         //Now Streaming
         SettingsScreenCard(
@@ -74,7 +74,7 @@ fun NotificationScreen() {
             title = stringResource(R.string.now_streaming),
             subtitle = stringResource(R.string.updates__watchlist)
         ) { isNowStreamingOn = !isNowStreamingOn }
-        Divider(Modifier.fillMaxWidth(), Dp.Hairline, color = Color.DarkGray)
+        HorizontalDivider(Modifier.fillMaxWidth(), Dp.Hairline, color = Color.DarkGray)
 
         //Trending Now
         SettingsScreenCard(
@@ -82,7 +82,7 @@ fun NotificationScreen() {
             title = stringResource(R.string.trending_now),
             subtitle = stringResource(R.string.dive_in_to_trending)
         ) { isTrendingOn = !isTrendingOn }
-        Divider(Modifier.fillMaxWidth(), Dp.Hairline, color = Color.DarkGray)
+        HorizontalDivider(Modifier.fillMaxWidth(), Dp.Hairline, color = Color.DarkGray)
 
         //News
         SettingsScreenCard(
@@ -90,7 +90,7 @@ fun NotificationScreen() {
             title = stringResource(R.string.news),
             subtitle = stringResource(R.string.stay_up_to_date)
         ) { isNewsOn = !isNewsOn }
-        Divider(Modifier.fillMaxWidth(), Dp.Hairline, color = Color.DarkGray)
+        HorizontalDivider(Modifier.fillMaxWidth(), Dp.Hairline, color = Color.DarkGray)
 
         //On Tonight
         SettingsScreenCard(
@@ -98,6 +98,6 @@ fun NotificationScreen() {
             title = stringResource(R.string.on_tonight),
             subtitle = stringResource(R.string.updates_watchlist_tonight)
         ) { isTonightOn = !isTonightOn }
-        Divider(Modifier.fillMaxWidth(), Dp.Hairline, color = Color.DarkGray)
+        HorizontalDivider(Modifier.fillMaxWidth(), Dp.Hairline, color = Color.DarkGray)
     }
 }

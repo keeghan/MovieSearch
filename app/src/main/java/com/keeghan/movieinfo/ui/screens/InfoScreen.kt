@@ -14,7 +14,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsDraggedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -38,12 +37,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -67,6 +65,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -245,9 +244,21 @@ fun InfoScreen(
  * */
 @Composable
 fun TitleScreen(overview: MovieOverViewResponse) {
-    val isTvSeries = (overview.title?.titleType ?: "") == "tvSeries"
-    val isMovie = (overview.title?.titleType ?: "") == "movie"
-    val title = overview.title?.title ?: "_"
+    val titleData = overview.title
+    val isTvSeries = titleData?.titleType == "tvSeries"
+    val isMovie = titleData?.titleType == "movie"
+    val title = titleData?.title?.takeIf { it.isNotBlank() }
+        ?: stringResource(R.string.untitled)
+    val titleType = when (titleData?.titleType) {
+        "movie" -> stringResource(R.string.type_movie)
+        "tvSeries" -> stringResource(R.string.type_tv_series)
+        "videoGame" -> stringResource(R.string.type_video_game)
+        "short" -> stringResource(R.string.type_short)
+        "tvMovie" -> stringResource(R.string.type_tv_movie)
+        "tvEpisode" -> stringResource(R.string.type_tv_episode)
+        "tvMiniSeries" -> stringResource(R.string.type_tv_miniseries)
+        else -> titleData?.titleType?.takeIf { it.isNotBlank() }
+    }
 
     val textSize = when (title.length) {
         in 0..10 -> MaterialTheme.typography.displayMedium
@@ -262,41 +273,49 @@ fun TitleScreen(overview: MovieOverViewResponse) {
             text = title,
             style = textSize
         )
-        Row {//Texts
-            Text(
-                text = (overview.title?.titleType ?: ""),
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.padding(end = 10.dp)
-            )
+        Row {
+            titleType?.let {
+                Text(
+                    text = it,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.padding(end = 10.dp)
+                )
+            }
             //Display "start - End year" if series otherwise just date
             if (isTvSeries) {
-                val startYear = overview.title?.seriesStartYear?.toString() ?: "_"
-                val endYear = overview.title?.seriesEndYear?.toString() ?: "_"
-                TitleText(text = "$startYear - $endYear")
+                val years = listOfNotNull(
+                    titleData?.seriesStartYear,
+                    titleData?.seriesEndYear
+                ).joinToString(" - ")
+                if (years.isNotBlank()) TitleText(text = years)
             } else if (isMovie) {
-                TitleText(text = overview.title?.year?.toString() ?: "_")
+                titleData?.year?.let { TitleText(text = it.toString()) }
                 val certificate = overview.certificates?.uS
-                    ?.firstOrNull()?.certificate ?: "_"
-                TitleText(text = certificate)
+                    ?.firstOrNull()?.certificate?.takeIf { it.isNotBlank() }
+                certificate?.let { TitleText(text = it) }
             }
-            val runningTime = overview.title?.runningTimeInMinutes
-                ?.let(::timeToStr) ?: "_"
-            TitleText(text = runningTime)
+            titleData?.runningTimeInMinutes?.let {
+                TitleText(text = timeToStr(it))
+            }
         }
 
         //Display "Episode Guide" only if input is from a tvseries
         if (isTvSeries) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
-                    text = "EPISODE GUIDE",
+                    text = stringResource(R.string.episode_guide).uppercase(),
                     Modifier
                         .padding(start = 0.dp, end = 10.dp)
-                        .clickable(
-                            interactionSource = remember { MutableInteractionSource() },
-                            indication = rememberRipple(color = MaterialTheme.colorScheme.primary)
-                        ) {})
-                val episodeCount = overview.title?.numberOfEpisodes?.toString() ?: "_"
-                TitleText(text = "$episodeCount episodes")
+                        .clickable {})
+                titleData?.numberOfEpisodes?.let { episodeCount ->
+                    TitleText(
+                        text = pluralStringResource(
+                            R.plurals.episode_count,
+                            episodeCount,
+                            episodeCount
+                        )
+                    )
+                }
             }
         }
     }
@@ -364,14 +383,20 @@ fun ImageSlider(
         Box(contentAlignment = Alignment.BottomStart) {
             //do not render large images
             MovieImageProvider(
-                url = if (isImageTooLarge) "null" else image.url.orEmpty(),
-                contentDescription = if (isImageTooLarge) stringResource(id = R.string.image_large) else image.caption.orEmpty(),
+                url = image.url.takeUnless { isImageTooLarge },
+                contentDescription = image.caption?.takeIf { it.isNotBlank() }
+                    ?: stringResource(R.string.movie_image),
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(250.dp)
             )
-            Text(text = if (isImageTooLarge) stringResource(id = R.string.image_large) else image.caption.orEmpty())
+            val caption = if (isImageTooLarge) {
+                stringResource(R.string.image_large)
+            } else {
+                image.caption?.takeIf { it.isNotBlank() }
+            }
+            caption?.let { Text(text = it) }
         }
     }
 }
@@ -394,8 +419,8 @@ private fun PlotSection(
                 isImageTooLarge = (image.height ?: 0) > 2500 || (image.width ?: 0) > 2500
             }
             MovieImageProvider(
-                url = if (isImageTooLarge || image == null) "null" else image.url.orEmpty(),
-                contentDescription = "Movie poster",
+                url = image?.url?.takeUnless { isImageTooLarge },
+                contentDescription = stringResource(R.string.movie_image),
                 contentScale = ContentScale.FillHeight,
                 modifier = Modifier
                     .height(180.dp)
@@ -480,7 +505,7 @@ fun WatchListButton() {
                     Text(
                         color = textColor,
                         style = MaterialTheme.typography.bodySmall,
-                        text = "Added by 100K users",   //not queried
+                        text = stringResource(R.string.added_by_users),   //not queried
                     )
                 }
             }
@@ -490,7 +515,7 @@ fun WatchListButton() {
 
 @Composable
 fun LongDivider() {
-    Divider(
+    HorizontalDivider(
         thickness = 2.dp,
         modifier = Modifier
             .padding(top = 20.dp, bottom = 10.dp)
@@ -515,9 +540,6 @@ fun RatingSection(
     metaCriticsNum: Int
 ) {
     val backgroundColor = if (metaScore > 70) MovieColors.DeepGreen else Color.Red
-    val ratingText = rating?.toString() ?: "_"
-    val userRatersText = userRaters?.toString() ?: "_"
-
     val star = rememberStarRate(
         fillColor = Color.Yellow,
     )
@@ -533,7 +555,9 @@ fun RatingSection(
                 .rowSize(index = 0, size = GridPadCellSize.Weight(2f)).build()
         ) {
             item {
-                Image(star, contentDescription = "ratings")
+                if (rating != null) {
+                    Image(star, contentDescription = null)
+                }
             }
             item { MutableRatingStar() }
             item {
@@ -554,12 +578,13 @@ fun RatingSection(
                     horizontalArrangement = Arrangement.Center,
                     verticalAlignment = Alignment.CenterVertically
                     ) {
+                    rating?.let {
                         Text(
-                            ratingText,
+                            stringResource(R.string.rating_out_of_ten, it.toString()),
                         fontWeight = FontWeight.Bold,
                         style = MaterialTheme.typography.titleMedium
                     )
-                    Text("/10")
+                    }
                 }
             }
 
@@ -568,7 +593,7 @@ fun RatingSection(
                     horizontalArrangement = Arrangement.Center,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text("Rate this", color = MaterialTheme.colorScheme.secondary)
+                    Text(stringResource(R.string.rate_this), color = MaterialTheme.colorScheme.secondary)
                 }
             }
             item {
@@ -576,25 +601,27 @@ fun RatingSection(
                     horizontalArrangement = Arrangement.Center,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(text = "MetaScore", modifier = Modifier)
+                    Text(text = stringResource(R.string.metascore), modifier = Modifier)
                 }
             }
             item {
                 Row(
                     horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.Top
                     ) {
+                    userRaters?.let {
                         Text(
-                            text = "$userRatersText critics",
-                        modifier = Modifier,
-                        style = MaterialTheme.typography.bodySmall
-                    )
+                            text = pluralStringResource(R.plurals.rating_count, it, it),
+                            modifier = Modifier,
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
                 }
             }
             item {
                 Row(
                     horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.Top
                 ) {
-                    Text(text = "", style = MaterialTheme.typography.bodySmall)
+                    Spacer(modifier = Modifier)
                 }
             }
             item {
@@ -602,7 +629,11 @@ fun RatingSection(
                     horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.Top
                 ) {
                     Text(
-                        text = "$metaCriticsNum critics",
+                        text = pluralStringResource(
+                            R.plurals.critic_count,
+                            metaCriticsNum,
+                            metaCriticsNum
+                        ),
                         modifier = Modifier,
                         style = MaterialTheme.typography.bodySmall
                     )
@@ -691,10 +722,7 @@ fun ParentsGuideSection(
                 text = stringResource(R.string.see_all),
                 modifier = Modifier
                     .padding(end = 10.dp)
-                    .clickable(
-                        interactionSource = remember { MutableInteractionSource() },
-                        indication = rememberRipple(color = MaterialTheme.colorScheme.primary)
-                    ) { onContentAdvisoryClick() }
+                    .clickable { onContentAdvisoryClick() }
             )
         }
 
@@ -719,39 +747,40 @@ fun ParentsGuideSection(
 
         Column(modifier = Modifier.padding(start = 10.dp)) {
             parentalGuides.forEach { guide ->
-                val status = guide.severityVotes?.status.orEmpty()
+                val status = guide.severityVotes?.status?.takeIf { it.isNotBlank() }
                 val bgColor: Color = when (status) {
                     "none" -> Color.Green
                     "mild" -> Color.Yellow
                     "moderate" -> MovieColors.Orange
                     "severe" -> Color.Red
-                    else -> {
-                        Color.Transparent
-                    }
+                    else -> Color.Transparent
                 }
-                val label: String = when (guide.label) {
+                val label: String? = when (guide.label) {
                     "nudity" -> stringResource(R.string.sex_and_nudity)
                     "violence" -> stringResource(R.string.violence_and_gore)
                     "profanity" -> stringResource(R.string.profanity)
                     "alcohol" -> stringResource(R.string.alcohol_drugs_and_smoking)
                     "frightening" -> stringResource(R.string.frightening_scenes)
-                    else -> {
-                        " "
-                    }
+                    else -> null
                 }
-                val guideValue = status.replaceFirstChar { it.uppercase() }
+                if (label == null) return@forEach
+                val guideValue = status?.replaceFirstChar { it.uppercase() }
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Card(
-                        modifier = Modifier
-                            .height(25.dp)
-                            .width(12.dp),
-                        shape = RoundedCornerShape(1.dp),
-                        colors = CardDefaults.cardColors(containerColor = bgColor),
-                        content = {}
-                    )
-                    SpaceW(side = 10.dp)
+                    if (status != null) {
+                        Card(
+                            modifier = Modifier
+                                .height(25.dp)
+                                .width(12.dp),
+                            shape = RoundedCornerShape(1.dp),
+                            colors = CardDefaults.cardColors(containerColor = bgColor),
+                            content = {}
+                        )
+                        SpaceW(side = 10.dp)
+                    }
                     Text(label)
-                    Text(guideValue, modifier = Modifier.alpha(0.5f))
+                    guideValue?.let {
+                        Text(it, modifier = Modifier.alpha(0.5f))
+                    }
                 }
                 SpaceH(10.dp)
             } //end of loop

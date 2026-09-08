@@ -114,7 +114,7 @@ private fun ContentAdvisoryList(parentalGuides: List<ParentalGuide>) {
 @Composable
 fun ContentAdvisoryCard(pgItem: ParentalGuide) {
     val votes = pgItem.severityVotes
-    val status = votes?.status.orEmpty()
+    val status = votes?.status?.takeIf { it.isNotBlank() }
     val totalVotes = (votes?.mildVotes ?: 0) + (votes?.moderateVotes ?: 0) +
             (votes?.severeVotes ?: 0) + (votes?.noneVotes ?: 0)
     var isUserVoted by remember { mutableStateOf(false) }
@@ -125,9 +125,7 @@ fun ContentAdvisoryCard(pgItem: ParentalGuide) {
         "mild" -> Color.Yellow
         "moderate" -> MovieColors.Orange
         "severe" -> Color.Red
-        else -> {
-            Color.Transparent
-        }
+        else -> Color.Transparent
     }
     val label: String = when (pgItem.label) {
         "nudity" -> stringResource(R.string.sex_and_nudity)
@@ -135,9 +133,7 @@ fun ContentAdvisoryCard(pgItem: ParentalGuide) {
         "profanity" -> stringResource(R.string.profanity)
         "alcohol" -> stringResource(R.string.alcohol_drugs_and_smoking)
         "frightening" -> stringResource(R.string.frightening_scenes)
-        else -> {
-            " "
-        }
+        else -> return
     }
 
     Card(
@@ -160,20 +156,30 @@ fun ContentAdvisoryCard(pgItem: ParentalGuide) {
                 content = {})
             SpaceW(8.dp)
             Column {
-                Text(
-                    text = status.replaceFirstChar {
+                status?.let { severity ->
+                    val localizedStatus = when (severity) {
+                        "none" -> stringResource(R.string.severity_none)
+                        "mild" -> stringResource(R.string.severity_mild)
+                        "moderate" -> stringResource(R.string.severity_moderate)
+                        "severe" -> stringResource(R.string.severity_severe)
+                        else -> severity.replaceFirstChar {
                         if (it.isLowerCase()) it.titlecase(
                             Locale.getDefault()
                         ) else it.toString()
-                    },
-                )
+                        }
+                    }
+                    Text(text = localizedStatus)
+                }
                 Text(text = stringResource(R.string.based_on_user_votes, totalVotes))
             }
         }
         SpaceH(8.dp)
         //Hide pgComment if it is spoiler , otherwise show pgComment
         //null check on if item exits or not
-        pgItem.items?.take(3)?.forEach { item ->
+        pgItem.items.orEmpty()
+            .filter { !it.text.isNullOrBlank() }
+            .take(3)
+            .forEach { item ->
             var isTextSpoiler by remember { mutableStateOf(item.isSpoiler == true) }
             HorizontalDivider(thickness = Dp.Hairline, color = Color.Gray)
             AnimatedContent(targetState = isTextSpoiler, label = stringResource(R.string.spoiler_animation)) {
@@ -198,14 +204,17 @@ fun ContentAdvisoryCard(pgItem: ParentalGuide) {
                         )
                     } else {
                         Text(
-                            text = item.text.orEmpty(),
+                            text = item.text ?: return@AnimatedContent,
                             maxLines = 3,
                             overflow = TextOverflow.Ellipsis,
                             modifier = Modifier.weight(0.9f),
                             style = MaterialTheme.typography.labelLarge,
                         )
                         IconButton(onClick = { /*TODO: menu item clicked*/ }) {
-                            Icon(Icons.Default.MoreVert, contentDescription = stringResource(R.string.more))
+                            Icon(
+                                Icons.Default.MoreVert,
+                                contentDescription = stringResource(R.string.more_options)
+                            )
                         }
                     }
                 }
@@ -220,7 +229,12 @@ fun ContentAdvisoryCard(pgItem: ParentalGuide) {
         SpaceH(5.dp)
 
         /*Vote Buttons*/
-        val voteButtons = listOf("None", "Mild", "Moderate", "Severe")
+        val voteButtons = listOf(
+            stringResource(R.string.severity_none),
+            stringResource(R.string.severity_mild),
+            stringResource(R.string.severity_moderate),
+            stringResource(R.string.severity_severe)
+        )
 
         //Create 4 button grid by using two loops
         Column(
@@ -278,10 +292,10 @@ fun VoteButton(
     onClick: (String) -> Unit
 ) {
     val bgColor: Color = when (label) {
-        "None" -> Green
-        "Mild" -> Color.Yellow
-        "Moderate" -> MovieColors.Orange
-        "Severe" -> Color.Red
+        stringResource(R.string.severity_none) -> Green
+        stringResource(R.string.severity_mild) -> Color.Yellow
+        stringResource(R.string.severity_moderate) -> MovieColors.Orange
+        stringResource(R.string.severity_severe) -> Color.Red
         else -> {
             Color.Transparent
         }

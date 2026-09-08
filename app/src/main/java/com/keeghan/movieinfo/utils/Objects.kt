@@ -26,6 +26,7 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import coil.request.CachePolicy
@@ -39,8 +40,8 @@ private const val MAX_BITMAP_SIZE = 10 * 1024 * 1024 // 100 MB
 @Composable
 fun MovieImageProvider(
     modifier: Modifier = Modifier,
-    url: String = "",
-    contentDescription: String = "",
+    url: String? = null,
+    contentDescription: String? = null,
     contentScale: ContentScale = ContentScale.Crop,
     error: Painter? = (painterResource(R.drawable.not_found))
 ) {
@@ -80,7 +81,7 @@ fun MutableRatingStar() {
             )
         }, label = "") {
             Image(if (it) rated else unrated,
-                contentDescription = "rate",
+                contentDescription = stringResource(R.string.rate_title),
                 modifier = Modifier
                     .padding(0.dp)
                     .clickable { isRated = !isRated })

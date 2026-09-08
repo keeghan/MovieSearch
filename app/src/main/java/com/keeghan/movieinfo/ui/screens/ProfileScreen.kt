@@ -5,7 +5,6 @@ import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -24,7 +23,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -34,7 +32,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
@@ -44,6 +41,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.annotation.StringRes
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.keeghan.movieinfo.R
@@ -53,7 +51,7 @@ import com.keeghan.movieinfo.utils.MoviePosters
 import com.keeghan.movieinfo.utils.SpaceH
 import com.keeghan.movieinfo.utils.SpaceW
 
-val engagements = listOf("Ratings", "Lists", "Reviews")
+val engagements = listOf(R.string.ratings, R.string.lists, R.string.reviews)
 
 @Composable
 fun ProfileScreen(
@@ -82,7 +80,11 @@ fun ProfileScreen(
             stringResource(R.string.watchlist_sub)
         ) { displayNotEnabledToast(context) }
         SpaceH(15.dp)
-        ProfileSection(stringResource(R.string.recently_viewed),"") { displayNotEnabledToast(context) }
+        ProfileSection(
+            sectionName = stringResource(R.string.recently_viewed),
+            sub = "",
+            showSecondExample = true
+        ) { displayNotEnabledToast(context) }
         SpaceH(15.dp)
 
         //Favorite People Section
@@ -133,7 +135,7 @@ fun ActionBar(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(Icons.Default.AccountCircle, stringResource(R.string.profile), tint = seed)
-        Text(text = "Mr. Man", modifier = Modifier.padding(start = 10.dp))
+        Text(text = stringResource(R.string.profile_name), modifier = Modifier.padding(start = 10.dp))
         Spacer(modifier = Modifier.weight(1f))
         IconButton(onClick = { onSettingsClick() }) {//Send button click upwards to RootNav to Settings
             Icon(Icons.Default.Settings, stringResource(R.string.settings))
@@ -144,15 +146,16 @@ fun ActionBar(
 
 @Composable
 fun HomeCard(
-    engagementType: String,
+    @StringRes engagementType: Int,
     onFeatureClick: () -> Unit
 ) {
     val insideText = when (engagementType) {
-        "Ratings" -> stringResource(R.string.rate_show)
-        "Lists" -> stringResource(R.string.create_list)
-        "Reviews" -> stringResource(R.string.no_reviews)
+        R.string.ratings -> stringResource(R.string.rate_show)
+        R.string.lists -> stringResource(R.string.create_list)
+        R.string.reviews -> stringResource(R.string.no_reviews)
         else -> throw IllegalArgumentException()
     }
+    val engagementLabel = stringResource(engagementType)
     Card(
         modifier = Modifier.width(180.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp, pressedElevation = 2.dp)
@@ -174,8 +177,8 @@ fun HomeCard(
                 }
             }
             SpaceH(15.dp)
-            Text(text = engagementType)
-            Text(text = "0")
+            Text(text = engagementLabel)
+            Text(text = stringResource(R.string.zero_count))
         }
     }
 }
@@ -185,6 +188,7 @@ fun HomeCard(
 fun ProfileSection(
     sectionName: String,
     sub:String,
+    showSecondExample: Boolean = false,
     onFeatureClick: () -> Unit
 ) {
     Card(
@@ -207,7 +211,7 @@ fun ProfileSection(
                     url = MoviePosters.johnWick,
                     runTime = "1h 41m"
                 )
-                if (sectionName == "Recently viewed") {
+                if (showSecondExample) {
                     WatchListMovieCard(
                         ratings = "7.6",
                         title = "SEE",
@@ -256,10 +260,7 @@ fun TitleCard(
         Text(
             text = stringResource(R.string.see_all), modifier = Modifier
                 .padding(end = 10.dp)
-                .clickable(
-                    interactionSource = remember { MutableInteractionSource() },
-                    indication = rememberRipple(color = MaterialTheme.colorScheme.primary),
-                ) { onFeatureClick() },
+                .clickable { onFeatureClick() },
             color = MaterialTheme.colorScheme.secondary, style = MaterialTheme.typography.bodyMedium
         )
 
@@ -281,7 +282,7 @@ fun ProfileCard(
                 .fillMaxWidth()
         ) {
             Text(text = sectionName, fontWeight = FontWeight.SemiBold)
-            Text(text = "0")
+            Text(text = stringResource(R.string.zero_count))
         }
     }
     SpaceH(2.dp)

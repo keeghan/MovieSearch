@@ -20,6 +20,7 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -40,6 +41,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
@@ -56,9 +58,22 @@ import com.keeghan.movieinfo.ui.components.MovieCard
 import com.keeghan.movieinfo.utils.SpaceH
 import com.keeghan.movieinfo.utils.SpaceW
 import com.keeghan.movieinfo.viewModel.SearchViewModel
+import androidx.annotation.StringRes
 
-val genres =
-    listOf("movie", "tvSeries", "videoGame", "short", "tvMovie", "tvEpisode", "tvMiniSeries")
+data class GenreOption(
+    val apiValue: String,
+    @StringRes val labelRes: Int
+)
+
+val genres = listOf(
+    GenreOption("movie", R.string.type_movie),
+    GenreOption("tvSeries", R.string.type_tv_series),
+    GenreOption("videoGame", R.string.type_video_game),
+    GenreOption("short", R.string.type_short),
+    GenreOption("tvMovie", R.string.type_tv_movie),
+    GenreOption("tvEpisode", R.string.type_tv_episode),
+    GenreOption("tvMiniSeries", R.string.type_tv_miniseries)
+)
 
 /**
  * A composable that represents the searchScreen
@@ -133,9 +148,10 @@ fun SearchScreen(
             ) {
                 val filter = uiState.filters
 
-                genres.forEach { genre ->
+                genres.forEach { option ->
+                    val genre = option.apiValue
                     GenreFilterCard(
-                        genre = genre, isClicked = when (genre) {
+                        genre = stringResource(option.labelRes), isClicked = when (genre) {
                             "movie" -> filter.movieFilter
                             "tvSeries" -> filter.tvSeriesFilter
                             "videoGame" -> filter.videoGameFilter
@@ -279,9 +295,9 @@ private fun SearchStatus(
 
 @Composable
 fun SmallPrimaryText(text: String?) {
+    if (text.isNullOrBlank()) return
     Text(
-        text
-            ?: "",
+        text,
         color = MaterialTheme.colorScheme.primary,
         fontSize = 12.sp,
         modifier = Modifier.padding(end = 5.dp)
@@ -290,9 +306,9 @@ fun SmallPrimaryText(text: String?) {
 
 @Composable
 fun SmallText(text: String?) {
+    if (text.isNullOrBlank()) return
     Text(
-        text
-            ?: "", fontSize = 12.sp, modifier = Modifier.padding(end = 5.dp)
+        text, fontSize = 12.sp, modifier = Modifier.padding(end = 5.dp)
     )
 }
 
@@ -302,19 +318,23 @@ fun GenreFilterCard(genre: String, isClicked: Boolean, onClick: () -> Unit) {
     Row(
         verticalAlignment = Alignment.CenterVertically, modifier = Modifier
             .padding(end = 10.dp)
+            .selectable(
+                selected = isClicked,
+                onClick = onClick,
+                role = Role.Checkbox
+            )
             .border(
                 BorderStroke(1.dp, MaterialTheme.colorScheme.primary),
                 shape = RoundedCornerShape(5.dp)
             )
             .padding(start = 5.dp, end = 5.dp, top = 6.dp, bottom = 6.dp)
     ) {
-        Text(text = genre, modifier = Modifier
-            .clickable {
-                onClick()
-            }
-            .height(intrinsicSize = IntrinsicSize.Min))
+        Text(
+            text = genre,
+            modifier = Modifier.height(intrinsicSize = IntrinsicSize.Min)
+        )
         AnimatedVisibility(visible = isClicked) {
-            Icon(Icons.Default.Check, contentDescription = stringResource(R.string.filter_selected))
+            Icon(Icons.Default.Check, contentDescription = null)
         }
     }
     SpaceW(side = 5.dp)

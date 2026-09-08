@@ -16,7 +16,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -44,7 +44,7 @@ fun AboutScreen() {
         SettingsScreenTitle(stringResource(R.string.version))
         Card(shape = RectangleShape) {
             Row(Modifier.fillMaxWidth()) {
-                Text(text = "App version", modifier = Modifier.padding(15.dp))
+                Text(text = stringResource(R.string.app_version), modifier = Modifier.padding(15.dp))
                 Spacer(modifier = Modifier.weight(1f))
                 Text(text = APP_VERSION, modifier = Modifier.padding(15.dp))
             }
@@ -54,37 +54,45 @@ fun AboutScreen() {
         //Help
         SettingsScreenTitle(stringResource(R.string.help))
         Card(shape = RectangleShape) {
-            SettingsScreenCard(title = "Need help?",
-                subtitle = "Get your questions answered by MovieInfo staff and other users" +
-                        "on the MovieInfo Community Forums.", onOptionSelect = {})
-            SettingsButton(text = "Get support") { }
+            SettingsScreenCard(
+                title = stringResource(R.string.need_help),
+                subtitle = stringResource(R.string.help_description),
+                onOptionSelect = {}
+            )
+            SettingsButton(text = stringResource(R.string.get_support)) { }
         }
-        Divider(Modifier.fillMaxWidth(), Dp.Hairline, color = Color.DarkGray)
+        HorizontalDivider(Modifier.fillMaxWidth(), Dp.Hairline, color = Color.DarkGray)
 
 
         //FeedBack
         SettingsScreenTitle(stringResource(R.string.feedback))
         Card(shape = RectangleShape) {
-            SettingsScreenCard(title = "Write a review",
-                subtitle = "Let others know what you think in the Google play store.", onOptionSelect = {})
-            SettingsButton(text = "Write a review") { }
-            Divider(Modifier.fillMaxWidth(), Dp.Hairline, color = Color.DarkGray)
-            SettingsScreenCard(title = "Provide feedback",
-                subtitle = "Let us know if you have an issue or an idea", onOptionSelect = {})
-            SettingsButton(text = "Email us") { }
+            SettingsScreenCard(
+                title = stringResource(R.string.write_review),
+                subtitle = stringResource(R.string.write_review_description),
+                onOptionSelect = {}
+            )
+            SettingsButton(text = stringResource(R.string.write_review)) { }
+            HorizontalDivider(Modifier.fillMaxWidth(), Dp.Hairline, color = Color.DarkGray)
+            SettingsScreenCard(
+                title = stringResource(R.string.provide_feedback),
+                subtitle = stringResource(R.string.provide_feedback_description),
+                onOptionSelect = {}
+            )
+            SettingsButton(text = stringResource(R.string.email_us)) { }
         }
-        Divider(Modifier.fillMaxWidth(), Dp.Hairline, color = Color.DarkGray)
+        HorizontalDivider(Modifier.fillMaxWidth(), Dp.Hairline, color = Color.DarkGray)
 
 
         //Legal
         SettingsScreenTitle(stringResource(R.string.legal))
         Card(shape = RectangleShape) {
             Row(Modifier.fillMaxWidth()) {
-                Text(text = "Legal Information", modifier = Modifier.padding(15.dp))
+                Text(text = stringResource(R.string.legal_information), modifier = Modifier.padding(15.dp))
                 Spacer(modifier = Modifier.weight(1f))
             }
         }
-        Divider(Modifier.fillMaxWidth(), Dp.Hairline, color = Color.DarkGray)
+        HorizontalDivider(Modifier.fillMaxWidth(), Dp.Hairline, color = Color.DarkGray)
     }
 }
 

@@ -70,7 +70,7 @@ fun WatchListMovieCard(
                 SpaceH(side = 2.dp)
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
-                        Icons.Default.Star, contentDescription = "ratings", tint = seed,
+                        Icons.Default.Star, contentDescription = null, tint = seed,
                         modifier = Modifier
                             .size(18.dp)
                             .padding(end = 5.dp)
