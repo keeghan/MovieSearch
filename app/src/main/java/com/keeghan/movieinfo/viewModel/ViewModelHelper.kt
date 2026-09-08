@@ -6,13 +6,13 @@ package com.keeghan.movieinfo.viewModel
  * Passed as part of [SearchUiState]
  * */
 data class Filters(
-    val movieFilter: Boolean,
-    val shortFilter: Boolean,
-    val tvSeriesFilter: Boolean,
-    val videoGameFilter: Boolean,
-    val tvMovieFilter: Boolean,
-    val tvEpisodeFilter: Boolean,
-    val tvMiniSeriesFilter: Boolean,
+    val movieFilter: Boolean = false,
+    val shortFilter: Boolean = false,
+    val tvSeriesFilter: Boolean = false,
+    val videoGameFilter: Boolean = false,
+    val tvMovieFilter: Boolean = false,
+    val tvEpisodeFilter: Boolean = false,
+    val tvMiniSeriesFilter: Boolean = false,
 )
 
 /**
@@ -20,12 +20,9 @@ data class Filters(
  * applied search filters in [SearchViewModel]
  **/
 data class SearchUiState(
-    val searchState: ApiCallState,
-    val filters: Filters,
-    val errorHandler: ErrorHandler
-)
-
-data class ErrorHandler(
-    val msg: String = "",
-    val isShown: Boolean = true
+    val query: String = "",
+    val filters: Filters = Filters(),
+    val hasSearched: Boolean = false,
+    val isDebouncing: Boolean = false,
+    val isBlankQueryError: Boolean = false
 )

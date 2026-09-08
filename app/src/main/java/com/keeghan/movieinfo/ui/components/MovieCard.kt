@@ -37,7 +37,7 @@ fun MovieCard(
     movie: Result,
     onMovieClick: (String) -> Unit
 ) {
-    val title = movie.title.orEmpty()
+    val title = movie.title ?: "_"
     Card(
         modifier = Modifier
             .width(100.dp)
@@ -56,7 +56,7 @@ fun MovieCard(
                     .height(90.dp),
                 verticalArrangement = Arrangement.SpaceBetween
             ) {
-                SmallPrimaryText(text = movie.titleType.orEmpty())
+                SmallPrimaryText(text = movie.titleType ?: "_")
                 Spacer(modifier = Modifier.weight(1f))
                 Box {
                     Text(
@@ -69,8 +69,8 @@ fun MovieCard(
                 }
                 Spacer(modifier = Modifier.weight(1f))
                 Row {
-                    SmallPrimaryText(text = movie.year?.toString().orEmpty())
-                    SmallPrimaryText(text = movie.year?.toString().orEmpty())
+                    SmallPrimaryText(text = movie.year?.toString() ?: "_")
+                    SmallPrimaryText(text = movie.year?.toString() ?: "_")
                 }
                 SmallSpaceH()
             }

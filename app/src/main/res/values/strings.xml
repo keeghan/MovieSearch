@@ -23,7 +23,10 @@
     <string name="filter_selected">filter selected</string>
     <string name="error">error</string>
     <string name="no_matches">no matches</string>
-    <string name="empty_searchbar">empty searchBar</string>
+    <string name="empty_searchbar">Enter a movie or show name</string>
+    <string name="search_error">Could not load search results</string>
+    <string name="search_prompt">Start typing to search for movies and shows</string>
+    <string name="retry">Retry</string>
     <string name="search_movie_name">search movie name</string>
     <string name="movie_name">movie name</string>
     <string name="search">Search</string>

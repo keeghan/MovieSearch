@@ -1,19 +1,21 @@
 package com.keeghan.movieinfo.viewModel
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.paging.LoadState
-import androidx.paging.LoadStates
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import com.keeghan.movieinfo.models.shows.Result
 import com.keeghan.movieinfo.repository.EpisodeRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -21,105 +23,100 @@ import javax.inject.Named
 
 
 @HiltViewModel
+@OptIn(ExperimentalCoroutinesApi::class)
 class SearchViewModel @Inject constructor(
     @Named("mainRepository") private val repository: EpisodeRepository,
 ) : ViewModel() {
-    private val _uiState = MutableStateFlow(
-        SearchUiState(
-            searchState = ApiCallState.IDLE, filters = Filters(
-                movieFilter = false,
-                shortFilter = false,
-                tvSeriesFilter = false,
-                videoGameFilter = false,
-                tvMovieFilter = false,
-                tvEpisodeFilter = false,
-                tvMiniSeriesFilter = false,
-            ),
-            errorHandler = ErrorHandler()
-        )
-    )
+    private val _uiState = MutableStateFlow(SearchUiState())
     val uiState: StateFlow<SearchUiState> = _uiState.asStateFlow()
 
-    //Todo: Maybe integrate data into uiState
-    private val _movieSearchResult = MutableStateFlow<PagingData<Result>>(
-        PagingData.empty(
-            LoadStates(
-                refresh = LoadState.NotLoading(true),
-                prepend = LoadState.NotLoading(true),
-                append = LoadState.NotLoading(true)
-            )
-        )
-    )
+    private var debounceJob: Job? = null
+    private var requestId = 0
+    private val searchRequest = MutableStateFlow(SearchRequest())
 
-    val movieSearchResult = _movieSearchResult as Flow<PagingData<Result>>
-
-
-    /*Search using current Filters*/
-    private fun search(title: String) {
-        _uiState.update { it.copy(searchState = ApiCallState.LOADING) }
-
-        //create a list of filters to add to api get query
-        val types = listOfNotNull(
-            if (_uiState.value.filters.movieFilter) "movie" else null,
-            if (_uiState.value.filters.shortFilter) "short" else null,
-            if (_uiState.value.filters.tvSeriesFilter) "tvSeries" else null,
-            if (_uiState.value.filters.videoGameFilter) "videoGame" else null,
-            if (_uiState.value.filters.tvMovieFilter) "tvMovie" else null,
-            if (_uiState.value.filters.tvEpisodeFilter) "tvEpisode" else null,
-            if (_uiState.value.filters.tvMiniSeriesFilter) "tvMiniSeries" else null,
-        ).joinToString(",")
-        Log.i("Filters", types)
-        viewModelScope.launch {
-            repository.findTitle(title, types).cachedIn(viewModelScope).collect { pagingData ->
-                _movieSearchResult.value = pagingData
-                _uiState.update { it.copy(searchState = ApiCallState.SUCCESS) }
+    val movieSearchResult: Flow<PagingData<Result>> = searchRequest
+        .flatMapLatest { request ->
+            if (request.query.isBlank()) {
+                flowOf(PagingData.empty())
+            } else {
+                repository.findTitle(request.query, request.filters.toApiValue())
             }
         }
-    }
+        .cachedIn(viewModelScope)
 
-    /*Search method use when a filter button is used */
-    fun searchWithFilters(title: String, filters: Filters) {
-        _uiState.update { it.copy(filters = filters) }
-        search(title)
-    }
 
-    /* Clear all filters and Search
-    * use full when a new search is conducted by the search Button*/
-    fun searchWithBtn(title: String) {
-        clearAllFilters()
-        search(title)
-    }
-
-    fun clearData() {
-        _movieSearchResult.value = PagingData.empty(
-            LoadStates(
-                refresh = LoadState.NotLoading(true),
-                prepend = LoadState.NotLoading(true),
-                append = LoadState.NotLoading(true)
-            )
-        )
-    }
-
-    /*Clear all filters from search results*/
-    private fun clearAllFilters() {
+    fun onQueryChanged(query: String) {
         _uiState.update {
             it.copy(
-                filters = Filters(
-                    movieFilter = false,
-                    shortFilter = false,
-                    tvSeriesFilter = false,
-                    videoGameFilter = false,
-                    tvMovieFilter = false,
-                    tvEpisodeFilter = false,
-                    tvMiniSeriesFilter = false,
-                )
+                query = query,
+                isDebouncing = query.isNotBlank(),
+                isBlankQueryError = false
             )
+        }
+        debounceJob?.cancel()
+        searchRequest.value = SearchRequest()
+
+        if (query.isBlank()) {
+            _uiState.update { it.copy(hasSearched = false, isDebouncing = false) }
+            return
+        }
+
+        debounceJob = viewModelScope.launch {
+            delay(SEARCH_DEBOUNCE_MILLIS)
+            search(query, _uiState.value.filters)
         }
     }
 
-    fun updateErrorHandler() {
-        _uiState.update { it.copy(errorHandler = ErrorHandler(isShown = true)) }
+    private fun search(query: String, filters: Filters) {
+        _uiState.update { it.copy(hasSearched = true, isDebouncing = false) }
+        searchRequest.value = SearchRequest(query.trim(), filters, ++requestId)
     }
 
+    fun searchWithFilters(filters: Filters) {
+        debounceJob?.cancel()
+        _uiState.update { it.copy(filters = filters) }
+        val query = _uiState.value.query
+        if (query.isNotBlank()) search(query, filters)
+    }
+
+    fun submitSearch() {
+        val query = _uiState.value.query
+        if (query.isBlank()) {
+            _uiState.update { it.copy(isBlankQueryError = true) }
+            return
+        }
+
+        debounceJob?.cancel()
+        val filters = Filters()
+        _uiState.update {
+            it.copy(filters = filters, isDebouncing = false, isBlankQueryError = false)
+        }
+        search(query, filters)
+    }
+
+    fun retrySearch() {
+        val state = _uiState.value
+        if (state.query.isNotBlank()) search(state.query, state.filters)
+    }
+
+    private fun Filters.toApiValue(): String = listOfNotNull(
+        if (movieFilter) "movie" else null,
+        if (shortFilter) "short" else null,
+        if (tvSeriesFilter) "tvSeries" else null,
+        if (videoGameFilter) "videoGame" else null,
+        if (tvMovieFilter) "tvMovie" else null,
+        if (tvEpisodeFilter) "tvEpisode" else null,
+        if (tvMiniSeriesFilter) "tvMiniSeries" else null,
+    ).joinToString(",")
+
+    private companion object {
+        const val SEARCH_DEBOUNCE_MILLIS = 400L
+    }
+
+    private data class SearchRequest(
+        val query: String = "",
+        val filters: Filters = Filters(),
+        val id: Int = 0
+    )
 }
 

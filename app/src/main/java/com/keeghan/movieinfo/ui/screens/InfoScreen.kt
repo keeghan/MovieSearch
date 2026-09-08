@@ -123,94 +123,94 @@ fun InfoScreen(
         viewModel.getParentalGuidance(movieId)
     }
 
-    Column(
-        Modifier
-            .verticalScroll(rememberScrollState())
-            .fillMaxSize()
-            .padding(10.dp, bottom = Constants.BOTTOM_BAR_PADDING), horizontalAlignment = Alignment.CenterHorizontally
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
     ) {
-
         //Use appropriate action on according to UiState
         when (uiState.overviewState) {
             ApiCallState.SUCCESS -> {
-                val overview = movieOverView ?: return@Column
-                //Title
-                TitleScreen(overview = overview)
-                //Carousel
-                Spacer(modifier = Modifier.height(3.dp))
-                if (images.isNullOrEmpty()) {
-                    MovieImageProvider(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(250.dp)
-                            .layout { measurable, constraints ->
-                                val placeable = measurable.measure(
-                                    constraints.copy(
-                                        maxWidth = constraints.maxWidth + 20.dp.roundToPx(), //add the end padding 16.dp
+                val overview = movieOverView ?: return@Box
+                Column(
+                    modifier = Modifier
+                        .verticalScroll(rememberScrollState())
+                        .fillMaxSize()
+                        .padding(10.dp, bottom = Constants.BOTTOM_BAR_PADDING),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    //Title
+                    TitleScreen(overview = overview)
+                    //Carousel
+                    Spacer(modifier = Modifier.height(3.dp))
+                    if (images.isNullOrEmpty()) {
+                        MovieImageProvider(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(250.dp)
+                                .layout { measurable, constraints ->
+                                    val placeable = measurable.measure(
+                                        constraints.copy(
+                                            maxWidth = constraints.maxWidth + 20.dp.roundToPx(), //add the end padding 16.dp
+                                        )
                                     )
-                                )
-                                layout(placeable.width, placeable.height) {
-                                    placeable.place(0, 0)
-                                }
-                            }, contentScale = ContentScale.FillHeight
+                                    layout(placeable.width, placeable.height) {
+                                        placeable.place(0, 0)
+                                    }
+                                }, contentScale = ContentScale.FillHeight
+                        )
+                    } else {
+                        ImageSlider(images = images)
+                    }
+                    Spacer(modifier = Modifier.height(5.dp))
+                    //Plot
+                    PlotSection(
+                        overview.title?.image,
+                        overview.genres,
+                        plot = overview.plotOutline?.text
                     )
-                } else {
-                    ImageSlider(images = images)
-                }
-                Spacer(modifier = Modifier.height(5.dp))
-                //Plot
-                PlotSection(
-                    overview.title?.image,
-                    overview.genres,
-                    plot = overview.plotOutline?.text
-                )
-                LongDivider()
-                //Ratings
-                RatingSection(
-                    userRaters = overview.ratings?.ratingCount,
-                    rating = overview.ratings?.rating,
-                    metaScore = 90,  //TODO: Api Limitation
-                    metaCriticsNum = 80 //TODO: Api Limitation
-                )
-                Spacer(modifier = Modifier.height(5.dp))
-                NotificationSection()
+                    LongDivider()
+                    //Ratings
+                    RatingSection(
+                        userRaters = overview.ratings?.ratingCount,
+                        rating = overview.ratings?.rating,
+                        metaScore = 90,  //TODO: Api Limitation
+                        metaCriticsNum = 80 //TODO: Api Limitation
+                    )
+                    Spacer(modifier = Modifier.height(5.dp))
+                    NotificationSection()
 
-                /* Ratings Sections: check that ratings have successfully loaded and display Ratings Section*/
-                when (uiState.parentalGuideState) {
-                    ApiCallState.SUCCESS -> {
-                        SpaceH(side = 20.dp)
-                        if (moviePgScores?.parentalguide?.isNotEmpty() == true) {
-                            //turn pgObject to string to pass as nav argument
-                            val pgString = Json.encodeToString(moviePgScores)
+                    /* Ratings Sections: check that ratings have successfully loaded and display Ratings Section*/
+                    when (uiState.parentalGuideState) {
+                        ApiCallState.SUCCESS -> {
+                            SpaceH(side = 20.dp)
+                            if (moviePgScores?.parentalguide?.isNotEmpty() == true) {
+                                //turn pgObject to string to pass as nav argument
+                                val pgString = Json.encodeToString(moviePgScores)
 
-                            ParentsGuideSection(
-                                parentalGuides = moviePgScores.parentalguide.orEmpty()
-                            ) { onContentAdvisoryClick(pgString) }   //pass parentalGuidance objectString upwards
+                                ParentsGuideSection(
+                                    parentalGuides = moviePgScores.parentalguide.orEmpty()
+                                ) { onContentAdvisoryClick(pgString) }   //pass parentalGuidance objectString upwards
+                            }
                         }
-                    }
 
-                    ApiCallState.LOADING -> {
-                        Column(
-                            Modifier.fillMaxSize(),
-                            verticalArrangement = Arrangement.Center,
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            CircularProgressIndicator()
+                        ApiCallState.LOADING -> {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(24.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                CircularProgressIndicator()
+                            }
                         }
-                    }
 
-                    else -> {} //error handling and idle state done in outer calls
+                        else -> {} //error handling and idle state done in outer calls
+                    }
                 }
             }
 
             ApiCallState.LOADING -> {
-                Column(
-                    Modifier.fillMaxSize(),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    CircularProgressIndicator()
-                }
+                CircularProgressIndicator()
             }
 
             ApiCallState.ERROR -> {
@@ -251,7 +251,7 @@ fun InfoScreen(
 fun TitleScreen(overview: MovieOverViewResponse) {
     val isTvSeries = (overview.title?.titleType ?: "") == "tvSeries"
     val isMovie = (overview.title?.titleType ?: "") == "movie"
-    val title = overview.title?.title.orEmpty()
+    val title = overview.title?.title ?: "_"
 
     val textSize = when (title.length) {
         in 0..10 -> MaterialTheme.typography.displayMedium
@@ -274,18 +274,18 @@ fun TitleScreen(overview: MovieOverViewResponse) {
             )
             //Display "start - End year" if series otherwise just date
             if (isTvSeries) {
-                val years = listOfNotNull(
-                    overview.title?.seriesStartYear,
-                    overview.title?.seriesEndYear
-                ).joinToString(" - ")
-                if (years.isNotEmpty()) TitleText(text = years)
+                val startYear = overview.title?.seriesStartYear?.toString() ?: "_"
+                val endYear = overview.title?.seriesEndYear?.toString() ?: "_"
+                TitleText(text = "$startYear - $endYear")
             } else if (isMovie) {
-                overview.title?.year?.let { TitleText(text = it.toString()) }
-                overview.certificates?.uS?.firstOrNull()?.certificate?.let {
-                    TitleText(text = it)
-                }
+                TitleText(text = overview.title?.year?.toString() ?: "_")
+                val certificate = overview.certificates?.uS
+                    ?.firstOrNull()?.certificate ?: "_"
+                TitleText(text = certificate)
             }
-            TitleText(text = timeToStr(overview.title?.runningTimeInMinutes ?: 0))
+            val runningTime = overview.title?.runningTimeInMinutes
+                ?.let(::timeToStr) ?: "_"
+            TitleText(text = runningTime)
         }
 
         //Display "Episode Guide" only if input is from a tvseries
@@ -299,9 +299,8 @@ fun TitleScreen(overview: MovieOverViewResponse) {
                             interactionSource = remember { MutableInteractionSource() },
                             indication = rememberRipple(color = MaterialTheme.colorScheme.primary)
                         ) {})
-                overview.title?.numberOfEpisodes?.let {
-                    TitleText(text = "$it episodes")
-                }
+                val episodeCount = overview.title?.numberOfEpisodes?.toString() ?: "_"
+                TitleText(text = "$episodeCount episodes")
             }
         }
     }
@@ -514,9 +513,14 @@ fun LongDivider() {
 //User Ratings section that uses a grid
 @Composable
 fun RatingSection(
-    userRaters: Int? = 0, rating: Double? = 0.0, metaScore: Int, metaCriticsNum: Int
+    userRaters: Int? = null,
+    rating: Double? = null,
+    metaScore: Int,
+    metaCriticsNum: Int
 ) {
     val backgroundColor = if (metaScore > 70) MovieColors.DeepGreen else Color.Red
+    val ratingText = rating?.toString() ?: "_"
+    val userRatersText = userRaters?.toString() ?: "_"
 
     val star = rememberStarRate(
         fillColor = Color.Yellow,
@@ -553,9 +557,9 @@ fun RatingSection(
                 Row(
                     horizontalArrangement = Arrangement.Center,
                     verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        "$rating",
+                    ) {
+                        Text(
+                            ratingText,
                         fontWeight = FontWeight.Bold,
                         style = MaterialTheme.typography.titleMedium
                     )
@@ -582,9 +586,9 @@ fun RatingSection(
             item {
                 Row(
                     horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.Top
-                ) {
-                    Text(
-                        text = "$userRaters critics",
+                    ) {
+                        Text(
+                            text = "$userRatersText critics",
                         modifier = Modifier,
                         style = MaterialTheme.typography.bodySmall
                     )

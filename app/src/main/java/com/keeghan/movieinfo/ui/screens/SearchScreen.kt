@@ -1,12 +1,13 @@
 package com.keeghan.movieinfo.ui.screens
 
-import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
@@ -25,6 +26,9 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -33,19 +37,13 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -58,7 +56,6 @@ import com.keeghan.movieinfo.ui.components.MovieCard
 import com.keeghan.movieinfo.utils.SpaceH
 import com.keeghan.movieinfo.utils.SpaceW
 import com.keeghan.movieinfo.viewModel.SearchViewModel
-import kotlinx.coroutines.launch
 
 val genres =
     listOf("movie", "tvSeries", "videoGame", "short", "tvMovie", "tvEpisode", "tvMiniSeries")
@@ -80,32 +77,22 @@ fun SearchScreen(
     onMovieClick: (String) -> Unit
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
-    val context = LocalContext.current
-    var titleState by remember { mutableStateOf(TextFieldValue("")) }
-    val uiState = viewModel.uiState.collectAsState()
+    val uiState by viewModel.uiState.collectAsState()
     val movieResponse = viewModel.movieSearchResult.collectAsLazyPagingItems()
 
     val lazyVerticalGridState = rememberLazyGridState()
-    val scope = rememberCoroutineScope()
 
     Column(
-        Modifier
+        modifier
             .padding(top = 10.dp)
             .fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
         //  verticalArrangement = Arrangement.Center
     ) {
-        val mainErrorMsg = uiState.value.errorHandler
-        if (!mainErrorMsg.isShown) {
-            if (mainErrorMsg.msg.isNotEmpty()) {
-                Toast.makeText(context, mainErrorMsg.msg, Toast.LENGTH_SHORT).show()
-            }
-            viewModel.updateErrorHandler()
-        }
-
         SpaceH(side = 5.dp)
         OutlinedTextField(
-            value = titleState, onValueChange = { titleState = it },
+            value = uiState.query,
+            onValueChange = viewModel::onQueryChanged,
             placeholder = { Text(stringResource(R.string.movie_name)) },
             label = { Text(text = stringResource(R.string.search), style = MaterialTheme.typography.bodyMedium) },
             keyboardOptions = KeyboardOptions(
@@ -119,16 +106,17 @@ fun SearchScreen(
                 )
             },
             singleLine = true,
+            isError = uiState.isBlankQueryError,
+            supportingText = if (uiState.isBlankQueryError) {
+                { Text(stringResource(R.string.empty_searchbar)) }
+            } else {
+                null
+            },
             textStyle = MaterialTheme.typography.bodyMedium,
             shape = RoundedCornerShape(50),
             keyboardActions = KeyboardActions(onSearch = {
-                if (titleState.text.isNotEmpty() && titleState.text.isNotBlank()) {
-                    viewModel.searchWithBtn(titleState.text)
-                    keyboardController?.hide()
-                    scope.launch { lazyVerticalGridState.scrollToItem(index = 0) }
-                } else {
-                    Toast.makeText(context, R.string.empty_searchbar, Toast.LENGTH_SHORT).show()
-                }
+                viewModel.submitSearch()
+                keyboardController?.hide()
             }),
             modifier = Modifier
                 .fillMaxWidth()
@@ -136,15 +124,14 @@ fun SearchScreen(
         )
         SpaceH(side = 20.dp)
 
-        //check if loading successful
-        //Filter Cards(buttons) with different filters , default filter state = false
-        if (movieResponse.itemCount > 0) {
+        // Keep filters visible after the first request, including empty/error results.
+        if (uiState.hasSearched) {
             Row(
                 modifier = Modifier
                     .horizontalScroll(rememberScrollState())
                     .padding(start = 10.dp, end = 10.dp)
             ) {
-                val filter = uiState.value.filters
+                val filter = uiState.filters
 
                 genres.forEach { genre ->
                     GenreFilterCard(
@@ -159,9 +146,7 @@ fun SearchScreen(
                             else -> false
                         }
                     ) {
-                        viewModel.clearData() //empty list first
                         viewModel.searchWithFilters(
-                            titleState.text,
                             filter.copy(
                                 movieFilter = if (genre == "movie") !filter.movieFilter else filter.movieFilter,
                                 tvSeriesFilter = if (genre == "tvSeries") !filter.tvSeriesFilter else filter.tvSeriesFilter,
@@ -177,73 +162,119 @@ fun SearchScreen(
             }
 
             SpaceH(side = 10.dp)
+        }
 
-            //Search Results
-            LazyVerticalGrid(
-                state = lazyVerticalGridState,
-                columns = GridCells.Fixed(2),
-                modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(all = 15.dp),
-                verticalArrangement = Arrangement.spacedBy(10.dp),
-                horizontalArrangement = Arrangement.spacedBy(15.dp)
-            ) {
-                items(count = movieResponse.itemCount) { index ->
-                    movieResponse[index]?.let { movie ->
-                        MovieCard(movie = movie) { id ->
-                            onMovieClick(id)
-                        }
-                    }
-                }
+        val refreshState = movieResponse.loadState.refresh
+        when {
+            uiState.isDebouncing || refreshState is LoadState.Loading -> {
+                SearchLoadingGrid()
+            }
 
-                // representation of when end of appending new items
-                item {
-                    when (val state = movieResponse.loadState.append) {
-                        is LoadState.Error -> {
-                            val msg = when (state.error.message) {
-                                null -> stringResource(R.string.error)
-                                "no matches" -> stringResource(R.string.no_matches)  //todo fix recurring errors
-                                else -> state.error.message
+            refreshState is LoadState.Error -> {
+                SearchStatus(
+                    message = refreshState.error.message ?: stringResource(R.string.search_error),
+                    actionLabel = stringResource(R.string.retry),
+                    onAction = viewModel::retrySearch
+                )
+            }
+
+            uiState.hasSearched && movieResponse.itemCount == 0 -> {
+                SearchStatus(message = stringResource(R.string.no_matches))
+            }
+
+            movieResponse.itemCount > 0 -> {
+                // Search results
+                LazyVerticalGrid(
+                    state = lazyVerticalGridState,
+                    columns = GridCells.Fixed(2),
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(all = 15.dp),
+                    verticalArrangement = Arrangement.spacedBy(10.dp),
+                    horizontalArrangement = Arrangement.spacedBy(15.dp)
+                ) {
+                    items(count = movieResponse.itemCount) { index ->
+                        movieResponse[index]?.let { movie ->
+                            MovieCard(movie = movie) { id ->
+                                onMovieClick(id)
                             }
-                            Toast.makeText(LocalContext.current, msg, Toast.LENGTH_SHORT).show()
                         }
+                    }
 
-                        is LoadState.Loading -> {
-                            CircularProgressIndicator()
+                    // Representation of loading or failure while appending items.
+                    item {
+                        when (val state = movieResponse.loadState.append) {
+                            is LoadState.Error -> {
+                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                    Text(state.error.message ?: stringResource(R.string.search_error))
+                                    Button(onClick = movieResponse::retry) {
+                                        Text(stringResource(R.string.retry))
+                                    }
+                                }
+                            }
+
+                            is LoadState.Loading -> CircularProgressIndicator()
+
+                            else -> {}
                         }
-
-                        else -> {}
                     }
                 }
             }
 
-        }
-    } //end of lazyRow
-
-
-    //First time loading (loading from empty state or not appending) and loadFailed Error handling
-    when (val state = movieResponse.loadState.refresh) {
-        is LoadState.Loading -> {
-            Column(
-                modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                CircularProgressIndicator()
+            else -> {
+                SearchStatus(message = stringResource(R.string.search_prompt))
             }
         }
-
-        //reset PagingSource (to prevent re-propagating errors) and show error
-        is LoadState.Error -> {
-            val msg = state.error.message
-            viewModel.clearData()
-            Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
-
-        }
-
-        else -> {}
     }
+} //End of SearchScreen
 
-} //End of Scaffold
+@Composable
+private fun SearchLoadingGrid() {
+    LazyVerticalGrid(
+        columns = GridCells.Fixed(2),
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(15.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp),
+        horizontalArrangement = Arrangement.spacedBy(15.dp)
+    ) {
+        items(count = 6) {
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(280.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant
+                )
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(MaterialTheme.colorScheme.surfaceVariant)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun SearchStatus(
+    message: String,
+    actionLabel: String? = null,
+    onAction: (() -> Unit)? = null
+) {
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(text = message, style = MaterialTheme.typography.bodyLarge)
+        if (actionLabel != null && onAction != null) {
+            SpaceH(8.dp)
+            Button(onClick = onAction) {
+                Text(actionLabel)
+            }
+        }
+    }
+}
 
 
 @Composable

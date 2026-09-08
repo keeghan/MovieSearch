@@ -35,10 +35,6 @@ class MoviePagingSource(
                     msg = "Service Unavailable"
                 }
                 return LoadResult.Error(Exception(msg))
-            } else {
-                if (response.body()?.results == null) {
-                    return LoadResult.Error(Exception("no matches"))
-                }
             }
 
             LoadResult.Page(
