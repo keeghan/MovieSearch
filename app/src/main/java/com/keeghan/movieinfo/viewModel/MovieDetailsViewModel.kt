@@ -1,7 +1,5 @@
 package com.keeghan.movieinfo.viewModel
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.keeghan.movieinfo.models.MovieImagesResponse
@@ -9,7 +7,6 @@ import com.keeghan.movieinfo.models.MovieOverViewResponse
 import com.keeghan.movieinfo.models.MovieParentalGuideResponse
 import com.keeghan.movieinfo.repository.EpisodeRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -22,25 +19,21 @@ import javax.inject.Named
 @HiltViewModel
 class MovieDetailsViewModel @Inject constructor(
     @Named("mainRepository") private val repository: EpisodeRepository,
-    @Named("ioDispatcher") private val dispatcher: CoroutineDispatcher,
 ) : ViewModel() {
-    private val _uiState = MutableStateFlow(UIState(ApiCallState.IDLE, ApiCallState.IDLE, "", ""))
-    val uiState: StateFlow<UIState> = _uiState.asStateFlow()
-
-    private val _movieOverViewResponse = MutableLiveData<MovieOverViewResponse>()
-    val movieOverViewResponse: LiveData<MovieOverViewResponse> = _movieOverViewResponse
-
-    private val _movieImagesResponse = MutableLiveData<MovieImagesResponse>()
-    val movieImagesResponse: LiveData<MovieImagesResponse> = _movieImagesResponse
-
-    private val _pgResponse = MutableLiveData<MovieParentalGuideResponse>()
-    val pgResponse: LiveData<MovieParentalGuideResponse> = _pgResponse
+    private val _uiState = MutableStateFlow(MovieDetailsUiState())
+    val uiState: StateFlow<MovieDetailsUiState> = _uiState.asStateFlow()
 
 
     //Get overview and movie images
     fun findOverView(title: String) {
-        // _uiState.value = InfoScreenUiState.LOADING
-        _uiState.update { it.copy(overViewState = ApiCallState.LOADING) }
+        _uiState.update {
+            it.copy(
+                overviewState = ApiCallState.LOADING,
+                overview = null,
+                images = null,
+                overviewError = ""
+            )
+        }
         viewModelScope.launch {
             try {
                 val response = repository.findOverView(title)
@@ -48,20 +41,33 @@ class MovieDetailsViewModel @Inject constructor(
                 val overview = response.body()
                 val images = imagesResponse.body()
                 if (response.isSuccessful && imagesResponse.isSuccessful && overview != null && images != null) {
-                    _movieOverViewResponse.value = overview
-                    _movieImagesResponse.value = images
-                    _uiState.update { it.copy(overViewState = ApiCallState.SUCCESS) }
-                } else {
-                    if (!response.isSuccessful) {
-                        _uiState.update { it.copy(titleApiError = response.message()) }
-                    } else {
-                        _uiState.update { it.copy(titleApiError = imagesResponse.message()) }
+                    _uiState.update {
+                        it.copy(
+                            overviewState = ApiCallState.SUCCESS,
+                            overview = overview,
+                            images = images
+                        )
                     }
-                    _uiState.update { it.copy(overViewState = ApiCallState.ERROR) }
+                } else {
+                    val message = when {
+                        !response.isSuccessful -> response.message()
+                        !imagesResponse.isSuccessful -> imagesResponse.message()
+                        else -> "The server returned an empty response"
+                    }
+                    _uiState.update {
+                        it.copy(
+                            overviewState = ApiCallState.ERROR,
+                            overviewError = message
+                        )
+                    }
                 }
             } catch (e: Exception) {
-                _uiState.update { it.copy(titleApiError = e.message.toString()) }
-                _uiState.update { it.copy(overViewState = ApiCallState.ERROR) }
+                _uiState.update {
+                    it.copy(
+                        overviewState = ApiCallState.ERROR,
+                        overviewError = e.message ?: "Unknown error"
+                    )
+                }
             }
         }
     }
@@ -70,33 +76,59 @@ class MovieDetailsViewModel @Inject constructor(
     * Get parental guidance
     * */
     fun getParentalGuidance(title: String) {
-        _uiState.update { it.copy(pgState = ApiCallState.LOADING) }
+        _uiState.update {
+            it.copy(
+                parentalGuideState = ApiCallState.LOADING,
+                parentalGuide = null,
+                parentalGuideError = ""
+            )
+        }
         viewModelScope.launch {
             try {
                 val response = repository.getParentalGuide(title)
                 val parentalGuide = response.body()
                 if (response.isSuccessful && parentalGuide != null) {
-                    _pgResponse.value = parentalGuide
-                    _uiState.update { it.copy(pgState = ApiCallState.SUCCESS) }
+                    _uiState.update {
+                        it.copy(
+                            parentalGuideState = ApiCallState.SUCCESS,
+                            parentalGuide = parentalGuide
+                        )
+                    }
                 } else {
-                    _uiState.update { it.copy(pgError = response.message()) }
-                    _uiState.update { it.copy(pgState = ApiCallState.ERROR) }
+                    val message = if (response.isSuccessful) {
+                        "The server returned an empty response"
+                    } else {
+                        response.message()
+                    }
+                    _uiState.update {
+                        it.copy(
+                            parentalGuideState = ApiCallState.ERROR,
+                            parentalGuideError = message
+                        )
+                    }
                 }
             } catch (e: Exception) {
-                _uiState.update { it.copy(pgError = e.message.toString()) }
-                _uiState.update { it.copy(pgState = ApiCallState.ERROR) }
+                _uiState.update {
+                    it.copy(
+                        parentalGuideState = ApiCallState.ERROR,
+                        parentalGuideError = e.message ?: "Unknown error"
+                    )
+                }
             }
         }
     }
 
 }
 
-//Keep track of state of Api calls
-data class UIState(
-    val overViewState: ApiCallState,
-    val pgState: ApiCallState,
-    val pgError: String,
-    val titleApiError: String
+// Everything the movie details screen needs, represented by one immutable value.
+data class MovieDetailsUiState(
+    val overviewState: ApiCallState = ApiCallState.IDLE,
+    val parentalGuideState: ApiCallState = ApiCallState.IDLE,
+    val overview: MovieOverViewResponse? = null,
+    val images: MovieImagesResponse? = null,
+    val parentalGuide: MovieParentalGuideResponse? = null,
+    val overviewError: String = "",
+    val parentalGuideError: String = ""
 )
 
 //States of an API call

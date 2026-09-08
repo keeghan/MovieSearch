@@ -54,7 +54,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -108,10 +107,10 @@ fun InfoScreen(
     viewModel: MovieDetailsViewModel = hiltViewModel(),
     onContentAdvisoryClick: (String) -> Unit
 ) {
-    val uiState = viewModel.uiState.collectAsState()
-    val movieOverView by viewModel.movieOverViewResponse.observeAsState()
-    val movieImages by viewModel.movieImagesResponse.observeAsState()
-    val moviePgScores by viewModel.pgResponse.observeAsState()
+    val uiState by viewModel.uiState.collectAsState()
+    val movieOverView = uiState.overview
+    val movieImages = uiState.images
+    val moviePgScores = uiState.parentalGuide
 
     //remove large images to save data and prevent Canvas errors
     val images = movieImages?.images?.filter {
@@ -132,7 +131,7 @@ fun InfoScreen(
     ) {
 
         //Use appropriate action on according to UiState
-        when (uiState.value.overViewState) {
+        when (uiState.overviewState) {
             ApiCallState.SUCCESS -> {
                 val overview = movieOverView ?: return@Column
                 //Title
@@ -177,7 +176,7 @@ fun InfoScreen(
                 NotificationSection()
 
                 /* Ratings Sections: check that ratings have successfully loaded and display Ratings Section*/
-                when (uiState.value.pgState) {
+                when (uiState.parentalGuideState) {
                     ApiCallState.SUCCESS -> {
                         SpaceH(side = 20.dp)
                         if (moviePgScores?.parentalguide?.isNotEmpty() == true) {
@@ -185,7 +184,7 @@ fun InfoScreen(
                             val pgString = Json.encodeToString(moviePgScores)
 
                             ParentsGuideSection(
-                                parentalGuides = moviePgScores?.parentalguide.orEmpty()
+                                parentalGuides = moviePgScores.parentalguide.orEmpty()
                             ) { onContentAdvisoryClick(pgString) }   //pass parentalGuidance objectString upwards
                         }
                     }
@@ -215,12 +214,13 @@ fun InfoScreen(
             }
 
             ApiCallState.ERROR -> {
-                val errorMessage = uiState.value.titleApiError.ifBlank { stringResource(R.string.unknown_error) }
-                Toast.makeText(
-                    LocalContext.current,
-                    uiState.value.titleApiError,
-                    Toast.LENGTH_SHORT
-                ).show()
+                val errorMessage = uiState.overviewError.ifBlank {
+                    stringResource(R.string.unknown_error)
+                }
+                val context = LocalContext.current
+                LaunchedEffect(errorMessage) {
+                    Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
+                }
 
                 Column(
                     Modifier.fillMaxSize(),
@@ -291,7 +291,8 @@ fun TitleScreen(overview: MovieOverViewResponse) {
         //Display "Episode Guide" only if input is from a tvseries
         if (isTvSeries) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(text = "EPISODE GUIDE",
+                Text(
+                    text = "EPISODE GUIDE",
                     Modifier
                         .padding(start = 0.dp, end = 10.dp)
                         .clickable(
@@ -470,7 +471,9 @@ fun WatchListButton() {
                     isWatchListed = !isWatchListed
                 }) { //Click action, animation trigger
                     Icon(
-                        imageVector = icon, contentDescription = stringResource(R.string.add_to_playlist), tint = textColor
+                        imageVector = icon,
+                        contentDescription = stringResource(R.string.add_to_playlist),
+                        tint = textColor
                     )
                 }
                 Column {
@@ -492,7 +495,8 @@ fun WatchListButton() {
 
 @Composable
 fun LongDivider() {
-    Divider(thickness = 2.dp,
+    Divider(
+        thickness = 2.dp,
         modifier = Modifier
             .padding(top = 20.dp, bottom = 10.dp)
             .layout { measurable, constraints ->
@@ -642,7 +646,8 @@ fun NotificationSection() {
                     modifier = Modifier.padding(start = 5.dp)
                 )
             }
-            Switch(modifier = Modifier.scale(0.7f),
+            Switch(
+                modifier = Modifier.scale(0.7f),
                 checked = isChecked,
                 thumbContent = { SwitchDefaults.IconSize },
                 onCheckedChange = { isChecked = it })
@@ -682,7 +687,8 @@ fun ParentsGuideSection(
                     fontWeight = FontWeight.Bold
                 )
             }
-            Text(text = stringResource(R.string.see_all),
+            Text(
+                text = stringResource(R.string.see_all),
                 modifier = Modifier
                     .padding(end = 10.dp)
                     .clickable(
@@ -694,11 +700,12 @@ fun ParentsGuideSection(
 
         SpaceH(side = 20.dp)
 
-        Column(modifier = Modifier
-            .padding(start = 5.dp)
-            .clickable {
-                onContentAdvisoryClick()
-            }) {
+        Column(
+            modifier = Modifier
+                .padding(start = 5.dp)
+                .clickable {
+                    onContentAdvisoryClick()
+                }) {
             Text(text = stringResource(R.string.content_rating), modifier = Modifier.padding(bottom = 0.dp))
             Text(
                 text = stringResource(R.string.view_content_advisory),

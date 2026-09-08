@@ -11,15 +11,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import com.keeghan.movieinfo.models.MovieParentalGuideResponse
-import com.keeghan.movieinfo.models.ParentalGuide
 import com.keeghan.movieinfo.viewModel.ApiCallState
 import com.keeghan.movieinfo.viewModel.MovieDetailsViewModel
 import kotlinx.serialization.encodeToString
@@ -32,8 +29,8 @@ fun PreviewScreen(
     movieId: String,
     viewModel: MovieDetailsViewModel = hiltViewModel()
 ) {
-    val uiState = viewModel.uiState.collectAsState()
-    val pg by viewModel.pgResponse.observeAsState()
+    val uiState by viewModel.uiState.collectAsState()
+    val pg = uiState.parentalGuide
 
 
     LaunchedEffect(Unit) {
@@ -49,11 +46,10 @@ fun PreviewScreen(
             val pgString = Json.encodeToString(pg)
             Log.i("Preview", pgString.encodeUtf8().toString())
             ContentAdvisoryScreen(
-                navController = rememberNavController(),
-                pgString = pgString
+                navController = rememberNavController(), pgString = pgString
             )
 
-            ParentsGuideSection(parentalGuides = pg?.parentalguide.orEmpty()) {
+            ParentsGuideSection(parentalGuides = pg.parentalguide.orEmpty()) {
                 //   navController.navigate("${Graph.CONTENT_ADVISORY}/$pgString")
 
             }
@@ -61,7 +57,7 @@ fun PreviewScreen(
 
 
 
-        when (uiState.value.overViewState) {
+        when (uiState.overviewState) {
             ApiCallState.SUCCESS -> {
 //                if (pg?.parentalguide?.isNotEmpty() == true) {
 //                    val pgString = Json.encodeToString(pg)
