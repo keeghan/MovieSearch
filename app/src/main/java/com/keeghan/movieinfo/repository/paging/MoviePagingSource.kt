@@ -55,7 +55,8 @@ class MoviePagingSource(
 }
 
 
-fun extractId(url: String): String? {
+fun extractId(url: String?): String? {
+    if (url == null) return null
     val pattern = "/title/(\\w+)/".toRegex()
     val matchResult = pattern.find(url)
     return matchResult?.groupValues?.get(1)

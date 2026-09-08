@@ -114,7 +114,9 @@ fun InfoScreen(
     val moviePgScores by viewModel.pgResponse.observeAsState()
 
     //remove large images to save data and prevent Canvas errors
-    val images = movieImages?.images?.filter { it.width < 2000 && it.height <= 2000 }
+    val images = movieImages?.images?.filter {
+        (it.width ?: 0) < 2000 && (it.height ?: 0) <= 2000
+    }
 
     //Make Api calls when composable is launched
     LaunchedEffect(Unit) {
@@ -132,8 +134,9 @@ fun InfoScreen(
         //Use appropriate action on according to UiState
         when (uiState.value.overViewState) {
             ApiCallState.SUCCESS -> {
+                val overview = movieOverView ?: return@Column
                 //Title
-                TitleScreen(overview = movieOverView!!)
+                TitleScreen(overview = overview)
                 //Carousel
                 Spacer(modifier = Modifier.height(3.dp))
                 if (images.isNullOrEmpty()) {
@@ -158,15 +161,15 @@ fun InfoScreen(
                 Spacer(modifier = Modifier.height(5.dp))
                 //Plot
                 PlotSection(
-                    movieOverView!!.title?.image,
-                    movieOverView!!.genres,
-                    plot = movieOverView?.plotOutline?.text
+                    overview.title?.image,
+                    overview.genres,
+                    plot = overview.plotOutline?.text
                 )
                 LongDivider()
                 //Ratings
                 RatingSection(
-                    userRaters = movieOverView!!.ratings?.ratingCount,
-                    rating = movieOverView!!.ratings?.rating,
+                    userRaters = overview.ratings?.ratingCount,
+                    rating = overview.ratings?.rating,
                     metaScore = 90,  //TODO: Api Limitation
                     metaCriticsNum = 80 //TODO: Api Limitation
                 )
@@ -182,7 +185,7 @@ fun InfoScreen(
                             val pgString = Json.encodeToString(moviePgScores)
 
                             ParentsGuideSection(
-                                parentalGuides = moviePgScores!!.parentalguide
+                                parentalGuides = moviePgScores?.parentalguide.orEmpty()
                             ) { onContentAdvisoryClick(pgString) }   //pass parentalGuidance objectString upwards
                         }
                     }
@@ -248,11 +251,7 @@ fun InfoScreen(
 fun TitleScreen(overview: MovieOverViewResponse) {
     val isTvSeries = (overview.title?.titleType ?: "") == "tvSeries"
     val isMovie = (overview.title?.titleType ?: "") == "movie"
-    val title = if (overview.title?.title == null) {
-        ""
-    } else {
-        overview.title.title
-    }
+    val title = overview.title?.title.orEmpty()
 
     val textSize = when (title.length) {
         in 0..10 -> MaterialTheme.typography.displayMedium
@@ -275,12 +274,15 @@ fun TitleScreen(overview: MovieOverViewResponse) {
             )
             //Display "start - End year" if series otherwise just date
             if (isTvSeries) {
-                val time = "${overview.title?.seriesStartYear} - ${overview.title?.seriesEndYear}"
-                TitleText(text = time)
+                val years = listOfNotNull(
+                    overview.title?.seriesStartYear,
+                    overview.title?.seriesEndYear
+                ).joinToString(" - ")
+                if (years.isNotEmpty()) TitleText(text = years)
             } else if (isMovie) {
-                TitleText(text = overview.title?.year.toString())
-                if (overview.certificates != null) {
-                    TitleText(text = overview.certificates.uS[0].certificate)
+                overview.title?.year?.let { TitleText(text = it.toString()) }
+                overview.certificates?.uS?.firstOrNull()?.certificate?.let {
+                    TitleText(text = it)
                 }
             }
             TitleText(text = timeToStr(overview.title?.runningTimeInMinutes ?: 0))
@@ -296,9 +298,9 @@ fun TitleScreen(overview: MovieOverViewResponse) {
                             interactionSource = remember { MutableInteractionSource() },
                             indication = rememberRipple(color = MaterialTheme.colorScheme.primary)
                         ) {})
-                TitleText(
-                    text = overview.title?.numberOfEpisodes.toString() + " episodes"
-                )
+                overview.title?.numberOfEpisodes?.let {
+                    TitleText(text = "$it episodes")
+                }
             }
         }
     }
@@ -362,18 +364,18 @@ fun ImageSlider(
         state = pagerState
     ) {
         val image = images[it]
-        val isImageTooLarge = image.height > 2500 || image.width > 2500
+        val isImageTooLarge = (image.height ?: 0) > 2500 || (image.width ?: 0) > 2500
         Box(contentAlignment = Alignment.BottomStart) {
             //do not render large images
             MovieImageProvider(
-                url = if (isImageTooLarge) "null" else image.url,
-                contentDescription = if (isImageTooLarge) stringResource(id = R.string.image_large) else image.caption,
+                url = if (isImageTooLarge) "null" else image.url.orEmpty(),
+                contentDescription = if (isImageTooLarge) stringResource(id = R.string.image_large) else image.caption.orEmpty(),
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(250.dp)
             )
-            Text(text = if (isImageTooLarge) stringResource(id = R.string.image_large)  else image.caption)
+            Text(text = if (isImageTooLarge) stringResource(id = R.string.image_large) else image.caption.orEmpty())
         }
     }
 }
@@ -393,10 +395,10 @@ private fun PlotSection(
         Row {
             var isImageTooLarge = false
             if (image != null) {
-                isImageTooLarge = image.height > 2500 || image.width > 2500
+                isImageTooLarge = (image.height ?: 0) > 2500 || (image.width ?: 0) > 2500
             }
             MovieImageProvider(
-                url = if (isImageTooLarge || image == null) "null" else image.url,
+                url = if (isImageTooLarge || image == null) "null" else image.url.orEmpty(),
                 contentDescription = "Movie poster",
                 contentScale = ContentScale.FillHeight,
                 modifier = Modifier
@@ -710,7 +712,8 @@ fun ParentsGuideSection(
 
         Column(modifier = Modifier.padding(start = 10.dp)) {
             parentalGuides.forEach { guide ->
-                val bgColor: Color = when (guide.severityVotes.status) {
+                val status = guide.severityVotes?.status.orEmpty()
+                val bgColor: Color = when (status) {
                     "none" -> Color.Green
                     "mild" -> Color.Yellow
                     "moderate" -> MovieColors.Orange
@@ -729,7 +732,7 @@ fun ParentsGuideSection(
                         " "
                     }
                 }
-                val guideValue = guide.severityVotes.status.replaceFirstChar { it.uppercase() }
+                val guideValue = status.replaceFirstChar { it.uppercase() }
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Card(
                         modifier = Modifier

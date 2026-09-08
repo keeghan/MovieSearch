@@ -79,7 +79,7 @@ fun ContentAdvisoryScreen(
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
     ) {
-        pg.parentalguide.forEach { pgItem ->
+        pg.parentalguide.orEmpty().forEach { pgItem ->
             ContentAdvisoryCard(pgItem)
         }
     }
@@ -89,11 +89,13 @@ fun ContentAdvisoryScreen(
 @Composable
 fun ContentAdvisoryCard(pgItem: ParentalGuide) {
     val votes = pgItem.severityVotes
-    val totalVotes = votes.mildVotes + votes.moderateVotes + votes.severeVotes + votes.noneVotes
+    val status = votes?.status.orEmpty()
+    val totalVotes = (votes?.mildVotes ?: 0) + (votes?.moderateVotes ?: 0) +
+            (votes?.severeVotes ?: 0) + (votes?.noneVotes ?: 0)
     var isUserVoted by remember { mutableStateOf(false) }
     var btnLabelClicked by remember { mutableStateOf("") }
 
-    val bgColor: Color = when (votes.status) {
+    val bgColor: Color = when (status) {
         "none" -> Green
         "mild" -> Color.Yellow
         "moderate" -> MovieColors.Orange
@@ -103,7 +105,7 @@ fun ContentAdvisoryCard(pgItem: ParentalGuide) {
         }
     }
     val label: String = when (pgItem.label) {
-        "nudity" ->  stringResource(R.string.sex_and_nudity)
+        "nudity" -> stringResource(R.string.sex_and_nudity)
         "violence" -> stringResource(R.string.violence_and_gore)
         "profanity" -> stringResource(R.string.profanity)
         "alcohol" -> stringResource(R.string.alcohol_drugs_and_smoking)
@@ -124,16 +126,17 @@ fun ContentAdvisoryCard(pgItem: ParentalGuide) {
         Row(
             verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(start = 10.dp)
         ) {
-            Card(modifier = Modifier
-                .height(45.dp)
-                .width(10.dp),
+            Card(
+                modifier = Modifier
+                    .height(45.dp)
+                    .width(10.dp),
                 shape = RoundedCornerShape(2.dp),
                 colors = CardDefaults.cardColors(containerColor = bgColor),
                 content = {})
             SpaceW(8.dp)
             Column {
                 Text(
-                    text = votes.status.replaceFirstChar {
+                    text = status.replaceFirstChar {
                         if (it.isLowerCase()) it.titlecase(
                             Locale.getDefault()
                         ) else it.toString()
@@ -146,7 +149,7 @@ fun ContentAdvisoryCard(pgItem: ParentalGuide) {
         //Hide pgComment if it is spoiler , otherwise show pgComment
         //null check on if item exits or not
         pgItem.items?.take(3)?.forEach { item ->
-            var isTextSpoiler by remember { mutableStateOf(item.isSpoiler) }
+            var isTextSpoiler by remember { mutableStateOf(item.isSpoiler == true) }
             HorizontalDivider(thickness = Dp.Hairline, color = Color.Gray)
             AnimatedContent(targetState = isTextSpoiler, label = stringResource(R.string.spoiler_animation)) {
                 Row(
@@ -157,18 +160,20 @@ fun ContentAdvisoryCard(pgItem: ParentalGuide) {
                 ) {
                     if (it) {
                         Text(
-                            text = stringResource(R.string.spoiler_warnings), style = MaterialTheme.typography.labelSmall,
+                            text = stringResource(R.string.spoiler_warnings),
+                            style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.error,
                             modifier = Modifier.weight(0.80f)
                         )
-                        Icon(Icons.Default.ArrowDropDown, contentDescription = stringResource(R.string.show_spoiler),
+                        Icon(
+                            Icons.Default.ArrowDropDown, contentDescription = stringResource(R.string.show_spoiler),
                             modifier = Modifier
                                 .padding(end = 10.dp)
                                 .clickable { isTextSpoiler = false }
                         )
                     } else {
                         Text(
-                            text = item.text,
+                            text = item.text.orEmpty(),
                             maxLines = 3,
                             overflow = TextOverflow.Ellipsis,
                             modifier = Modifier.weight(0.9f),

@@ -53,7 +53,7 @@ fun PreviewScreen(
                 pgString = pgString
             )
 
-            ParentsGuideSection(parentalGuides = pg!!.parentalguide) {
+            ParentsGuideSection(parentalGuides = pg?.parentalguide.orEmpty()) {
                 //   navController.navigate("${Graph.CONTENT_ADVISORY}/$pgString")
 
             }

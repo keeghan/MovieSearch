@@ -37,29 +37,30 @@ fun MovieCard(
     movie: Result,
     onMovieClick: (String) -> Unit
 ) {
+    val title = movie.title.orEmpty()
     Card(
         modifier = Modifier
             .width(100.dp)
             .height(280.dp)
-            .clickable { onMovieClick(extractId(movie.id)!!) },
+            .clickable { extractId(movie.id)?.let(onMovieClick) },
         elevation = CardDefaults.cardElevation(
             defaultElevation = 4.dp,
             pressedElevation = 2.dp
         )
     ) {
         Column {
-            CardImage(url = movie?.image?.url, title = movie.title)
+            CardImage(url = movie.image?.url, title = title)
             Column(
                 Modifier
                     .padding(start = 4.dp, end = 4.dp, top = 2.dp)
                     .height(90.dp),
                 verticalArrangement = Arrangement.SpaceBetween
             ) {
-                SmallPrimaryText(text = movie.titleType)
+                SmallPrimaryText(text = movie.titleType.orEmpty())
                 Spacer(modifier = Modifier.weight(1f))
                 Box {
                     Text(
-                        movie.title,
+                        title,
                         maxLines = 2,
                         overflow = TextOverflow.Ellipsis,
                         lineHeight = 15.sp,
@@ -68,8 +69,8 @@ fun MovieCard(
                 }
                 Spacer(modifier = Modifier.weight(1f))
                 Row {
-                    SmallPrimaryText(text = movie.year.toString())
-                    SmallPrimaryText(text = movie.year.toString())
+                    SmallPrimaryText(text = movie.year?.toString().orEmpty())
+                    SmallPrimaryText(text = movie.year?.toString().orEmpty())
                 }
                 SmallSpaceH()
             }

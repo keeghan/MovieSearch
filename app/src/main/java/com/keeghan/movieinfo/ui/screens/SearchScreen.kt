@@ -187,9 +187,11 @@ fun SearchScreen(
                 verticalArrangement = Arrangement.spacedBy(10.dp),
                 horizontalArrangement = Arrangement.spacedBy(15.dp)
             ) {
-                items(count = movieResponse.itemCount) {
-                    MovieCard(movie = movieResponse[it]!!) { id ->
-                        onMovieClick(id)
+                items(count = movieResponse.itemCount) { index ->
+                    movieResponse[index]?.let { movie ->
+                        MovieCard(movie = movie) { id ->
+                            onMovieClick(id)
+                        }
                     }
                 }
 

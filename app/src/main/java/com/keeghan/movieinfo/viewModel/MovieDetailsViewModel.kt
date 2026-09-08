@@ -45,9 +45,11 @@ class MovieDetailsViewModel @Inject constructor(
             try {
                 val response = repository.findOverView(title)
                 val imagesResponse = repository.getImages(title)
-                if (response.isSuccessful && imagesResponse.isSuccessful) {
-                    _movieOverViewResponse.postValue(response.body())
-                    _movieImagesResponse.postValue(imagesResponse.body())
+                val overview = response.body()
+                val images = imagesResponse.body()
+                if (response.isSuccessful && imagesResponse.isSuccessful && overview != null && images != null) {
+                    _movieOverViewResponse.value = overview
+                    _movieImagesResponse.value = images
                     _uiState.update { it.copy(overViewState = ApiCallState.SUCCESS) }
                 } else {
                     if (!response.isSuccessful) {
@@ -72,8 +74,9 @@ class MovieDetailsViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 val response = repository.getParentalGuide(title)
-                if (response.isSuccessful) {
-                    _pgResponse.postValue(response.body())
+                val parentalGuide = response.body()
+                if (response.isSuccessful && parentalGuide != null) {
+                    _pgResponse.value = parentalGuide
                     _uiState.update { it.copy(pgState = ApiCallState.SUCCESS) }
                 } else {
                     _uiState.update { it.copy(pgError = response.message()) }
