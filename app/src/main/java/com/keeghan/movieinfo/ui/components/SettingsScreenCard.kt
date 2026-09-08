@@ -122,7 +122,7 @@ fun SettingsScreenCard(
 
 @Preview
 @Composable
-fun p() {
+fun SettingsTogglePreview() {
     SettingsScreenCard(
         toggleState = true,
         title = stringResource(R.string.on_tonight),
@@ -132,7 +132,7 @@ fun p() {
 
 @Preview
 @Composable
-fun s() {
+fun SettingsCardPreview() {
     SettingsScreenCard(
         title = stringResource(R.string.on_tonight),
         subtitle = stringResource(R.string.updates_watchlist_tonight),

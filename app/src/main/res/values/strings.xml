@@ -20,8 +20,6 @@
     <string name="watch_preferences">Watch preferences</string>
     <string name="notifs">Notifications</string>
     <string name="storage">Storage</string>
-    <string name="filter_selected">filter selected</string>
-    <string name="error">error</string>
     <string name="no_matches">no matches</string>
     <string name="empty_searchbar">Enter a movie or show name</string>
     <string name="search_error">Could not load search results</string>
@@ -68,7 +66,6 @@
     <string name="vote_thanks">Thanks for your Vote</string>
     <string name="spoiler_animation">spoiler_animation</string>
     <string name="show_spoiler">show spoiler</string>
-    <string name="more">more</string>
     <string name="video_c">VIDE0</string>
     <string name="tips_and_tricks">Tips and Tricks</string>
     <string name="get_most_out">Get the most out of MovieInfo</string>
@@ -101,7 +98,6 @@
     <string name="search_tab">Search</string>
     <string name="video_tab">Video</string>
     <string name="profile_tab">Profile</string>
-    <string name="movie_poster">Movie poster for %1$s</string>
     <string name="movie_image">Movie image</string>
     <string name="untitled">Untitled</string>
     <string name="episode_guide">Episode guide</string>

@@ -48,7 +48,7 @@ fun MediumHSpace() {
 }
 
 @Composable
-fun largeSpace() {
+fun LargeSpace() {
     Spacer(modifier = Modifier.height(16.dp))
 }
 
